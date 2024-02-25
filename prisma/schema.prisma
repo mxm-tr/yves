@@ -1,0 +1,87 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
+}
+
+datasource postgresDB {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  pseudo    String   @unique
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+  // Appointments made
+  bookedAppointments    Appointment[]
+  bookedAppointmentsIds String[]
+
+  // Schedules owned by the user
+  schedules      Schedule[]
+
+  // Links between users
+  followers FollowingLinks[] @relation("Followers")
+  followed FollowingLinks[] @relation("Followed")
+
+  @@map(name: "users")
+}
+
+model Schedule {
+  id   String   @id @default(cuid())
+  date DateTime
+
+  // Who owns the schedule
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String
+
+  // Appointments made on this schedule
+  appointments Appointment[]
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+  @@map(name: "schedules")
+}
+
+model Appointment {
+  id String @id @default(cuid())
+
+  // Who made the appointment
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  // On what schedule
+  schedule   Schedule @relation(fields: [scheduleId], references: [id])
+  scheduleId String
+
+  // Has it been confirmed by the owner of the schedule
+  confirmed Boolean
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+  @@map(name: "appointments")
+}
+
+model FollowingLinks {
+  id String @id @default(cuid())
+
+  // Who is following
+  follower   User   @relation("Followers", fields: [followerId], references: [id])
+  followerId String
+
+  // Who is being followed
+  followed   User   @relation("Followed", fields: [followedId], references: [id])
+  followedId String
+
+  // Has it been accepted by the followed
+  confirmed Boolean
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+  @@map(name: "followingLinks")
+}
