@@ -4,12 +4,10 @@ import { deleteAppointment } from '@/app/lib/actions';
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { slug: string } }
+    { params }: { params: { appointmentId: string } }
   ) {
   
-    console.log(params)
-    const id = params.slug
-    await deleteAppointment(id);
+    await deleteAppointment(params.appointmentId);
   
     return new Response('Appointment cancelled', {
       status: 200,

@@ -4,17 +4,8 @@ import React, { useState } from 'react';
 import { Button, Card, CardContent, Fade, Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import CheckIcon from '@mui/icons-material/Check';
-import { useRouter } from 'next/navigation';
 
-import { Appointment, Schedule, User } from 'prisma/prisma-client'
-
-interface ScheduleWithOwner extends Schedule {
-    owner: User
-}
-
-interface AppointmentWithSchedule extends Appointment {
-    schedule: ScheduleWithOwner
-}
+import { AppointmentWithSchedule } from '../lib/actions';
 
 const AppointmentCard: React.FC<{ appointment: AppointmentWithSchedule }> = ({ appointment }) => {
 
@@ -36,7 +27,7 @@ const AppointmentCard: React.FC<{ appointment: AppointmentWithSchedule }> = ({ a
             setDeleteConfirmationOpen(false);
 
             // Send a DELETE request to the backend API
-            const response = await fetch(`/appointments/${appointment.id}`, { method: 'DELETE' });
+            const response = await fetch(`/api/v1/appointments/${appointment.id}`, { method: 'DELETE' });
 
             if (response.ok) {
 

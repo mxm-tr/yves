@@ -3,6 +3,18 @@ import { PrismaClient, Appointment, Schedule, User } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+export interface AppointmentWithSchedule extends Appointment {
+    schedule: ScheduleWithOwner
+}
+
+export interface AppointmentWithScheduleAndUser extends AppointmentWithSchedule {
+    user: User
+}
+
+export interface ScheduleWithOwner extends Schedule {
+    owner: User
+}
+
 export async function getAcquaintances(): Promise<User[]> {
     // TODO: Change this to current user
     const currentUser = await prisma.user.findFirst({ where: { email: "john@example.com" } });
@@ -109,6 +121,9 @@ export async function getSchedulesGroupedByUserDay(userId: string): Promise<{ [k
 }
 
 export async function getAppointments() {
+    // TODO: Change this to current user
+    const currentUser = await prisma.user.findFirst({ where: { email: "john@example.com" } });
+
     return prisma.appointment.findMany({
         relationLoadStrategy: 'join', // or 'query'
         include: {
@@ -122,7 +137,58 @@ export async function getAppointments() {
                     }
                 }
             }
+        },
+        // Select appointments with the user
+        where: {
+            userId: currentUser?.id
         }
+    });
+}
+
+export async function getAppointmentsTakenWithMe() {
+    // TODO: Change this to current user
+    const currentUser = await prisma.user.findFirst({ where: { email: "john@example.com" } });
+
+    return prisma.appointment.findMany({
+        relationLoadStrategy: 'join', // or 'query'
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    pseudo: true
+                }
+            },
+            schedule: {
+                include: {
+                    owner: {
+                        select: {
+                            id: true,
+                            pseudo: true
+                        }
+                    }
+                }
+            }
+        },
+        // Select appointments the user booked
+        where: {
+            schedule: {
+                ownerId: currentUser?.id
+            }
+        }
+    });
+}
+
+export async function cancelAppointment(appointmentId: string): Promise<void> {
+    await prisma.appointment.update({
+        where: { id: appointmentId },
+        data: { confirmed: false },
+    });
+}
+
+export async function confirmAppointment(appointmentId: string): Promise<void> {
+    await prisma.appointment.update({
+        where: { id: appointmentId },
+        data: { confirmed: true },
     });
 }
 

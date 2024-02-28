@@ -89,10 +89,18 @@ async function main() {
     const schedule2 = await findOrCreateSchedule(new Date('2022-12-02T10:00:00Z'), user2.id);
     const schedule3 = await findOrCreateSchedule(new Date('2022-12-03T10:00:00Z'), user2.id);
     const schedule4 = await findOrCreateSchedule(new Date('2022-12-03T11:00:00Z'), user2.id);
+    const schedule5 = await findOrCreateSchedule(new Date('2022-12-02T11:00:00Z'), user1.id);
+    const schedule6 = await findOrCreateSchedule(new Date('2022-12-03T11:00:00Z'), user1.id);
 
     // Seed Appointments
+
+    // Appointments John took with Jane
     const appointment1 = await findOrCreateAppointment(user1.id, schedule1.id, true);
     const appointment2 = await findOrCreateAppointment(user1.id, schedule2.id, false);
+    
+    // Appointments Jane took with John
+    const appointment3 = await findOrCreateAppointment(user2.id, schedule5.id, true);
+    const appointment4 = await findOrCreateAppointment(user2.id, schedule6.id, false);
 
     console.log('Seed data inserted successfully');
 }

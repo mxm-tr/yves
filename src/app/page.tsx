@@ -6,11 +6,7 @@ import AppointmentCard from './components/appointmentCard';
 
 import { useEffect, useState } from 'react';
 
-import { Appointment, Schedule } from '@prisma/client'
-
-interface AppointmentWithSchedule extends Appointment{
-  schedule: Schedule
-}
+import { AppointmentWithSchedule } from './lib/actions'
 
 export default function Home() {
 
@@ -19,7 +15,7 @@ export default function Home() {
   const [isLoading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/appointments')
+    fetch('/api/v1/appointments')
       .then((res) => res.json())
       .then((data) => {
         setAppointments(data)
@@ -52,7 +48,7 @@ export default function Home() {
               <Grid container spacing={2}>
                 {appointments.map(appointment => (
                   <Grid item xs={5} key={appointment.id}>
-                    <AppointmentCard appointment={appointment} data-superjson/>
+                    <AppointmentCard appointment={appointment} />
                   </Grid>
                 ))}
               </Grid>

@@ -50,9 +50,18 @@ export default function Sidebar() {
                 <ListItem key="schedule" disablePadding>
                     <ListItemIcon><CalendarIcon /></ListItemIcon>
 
-                    <Link href="/schedule">
+                    <Link href="/book">
                         <ListItemButton>
-                            <ListItemText primary="Schedule" />
+                            <ListItemText primary="Book" />
+                        </ListItemButton>
+                    </Link>
+                </ListItem>
+                <ListItem key="my-appointments" disablePadding>
+                    <ListItemIcon><CalendarIcon /></ListItemIcon>
+
+                    <Link href="/appointments">
+                        <ListItemButton>
+                            <ListItemText primary="My Appointments" />
                         </ListItemButton>
                     </Link>
                 </ListItem>

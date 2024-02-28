@@ -31,13 +31,13 @@ export default function ScheduleForm() {
   useEffect(() => {
     setIsLoading(true);
     if (!scheduleOwner) {
-      fetch('/users')
+      fetch('/api/v1/users')
         .then((res) => res.json())
         .then((data) => {
           setRelatedUsers(data);
         })
     } else {
-      fetch(`/schedules/${scheduleOwner.id}`)
+      fetch(`/api/v1/schedules/${scheduleOwner.id}`)
         .then((res) => res.json())
         .then((data) => {
           setAvailableSchedules(new Map(Object.entries(data)));
@@ -83,7 +83,7 @@ export default function ScheduleForm() {
       setIsLoading(true);
 
       // Send a POST request to the backend API
-      const response = await fetch(`/appointments/schedule/${selectedScheduleId}`, { method: 'POST' });
+      const response = await fetch(`/api/v1/appointments/schedule/${selectedScheduleId}`, { method: 'POST' });
 
       if (response.ok) {
 
@@ -137,7 +137,7 @@ export default function ScheduleForm() {
                   ))}
                 </List>
               </Box>
-              : <Typography variant="h6">Oh no you don't know anyone yet!</Typography>}
+              : <Typography variant="h6">Oh no you don&apos;t know anyone yet!</Typography>}
           </Box>
         }
 
