@@ -1,16 +1,53 @@
 version: '3.8'
-
 services:
+  app-dev:
+    environment:
+      POSTGRES_PRISMA_URL: postgres://admin:${POSTGRES_ADMIN_PASSWORD:?error}@postgres:5432/yves
+    build:
+      context: .
+      target: app-base
+    entrypoint:
+      - sh
+      - -c
+    command:
+      - ./node_modules/.bin/prisma generate && npm run dev
+    env_file:
+      - dev.env
+    user: "${UID}:${GID}"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src:ro
+    depends_on:
+      - postgres
   postgres:
-    image: postgres:latest
+    build:
+      context: .
+      target: db
     environment:
       POSTGRES_DB: yves
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:?error}
+      DEX_DB_PASSWORD: ${DEX_DB_PASSWORD:?error}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
+  dex:
+    image: "dexidp/dex:v2.38.0-distroless"
+    container_name: dex
+    environment:
+      DEX_DB_PASSWORD: ${DEX_DB_PASSWORD:?error}
+    ports:
+      - "5556:5556"
+    configs:
+      - source: dex_config
+        target: /etc/dex/config.yaml
+    command: ["dex", "serve", "/etc/dex/config.yaml"]
+    depends_on:
+      - postgres
 volumes:
   postgres_data:
+configs:
+  dex_config:
+    file: ./dex/config.yaml

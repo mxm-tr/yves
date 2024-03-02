@@ -1,0 +1,19 @@
+staticClients:
+  - id: example-app
+    redirectURIs:
+      - 'http://localhost:5555/callback'
+    name: 'Example App'
+    secret: ZXhhbXBsZS1hcHAtc2VjcmV0'
+web:
+  http: 0.0.0.0:5556
+issuer: http://localhost:5556/dex
+storage:
+  type: postgres
+  config:
+    host: postgres
+    port: 5432
+    database: dex_db
+    user: dex
+    password: "{{ .Env.DEX_DB_PASSWORD }}"
+    ssl:
+      mode: disable

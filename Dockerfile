@@ -36,3 +36,9 @@ EXPOSE 3000
 
 # Define the command to start the app
 CMD ["npm", "start"]
+
+
+FROM postgres:16.2-alpine AS db
+
+ADD db/dex_init.sh /docker-entrypoint-initdb.d/
+RUN chmod +x /docker-entrypoint-initdb.d/*sh

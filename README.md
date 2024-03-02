@@ -3,12 +3,16 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 ## Getting Started
 
 ```bash
-export POSTGRES_ADMIN_PASSWORD=pwd; docker-compose up -d
+export POSTGRES_ADMIN_PASSWORD=pwd; 
+export DEX_DB_PASSWORD=lolol;
+docker-compose up -d
 
-export POSTGRES_PRISMA_URL=postgres://admin:pwd@localhost:5432/yves
+export POSTGRES_PRISMA_URL=postgres://admin:pwd@postgres:5432/yves
 npx prisma migrate dev
-
+npx prisma db seed
 ```
+
+Then, visit [http://localhost:3000]
 
 First, run the development server:
 
