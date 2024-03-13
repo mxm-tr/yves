@@ -1,5 +1,5 @@
 import { type NextRequest } from 'next/server'
-import { scheduleAppointment } from '@/app/lib/actions';
+import { scheduleAppointment } from '@/app/lib/appointments';
 
 
 export async function POST(

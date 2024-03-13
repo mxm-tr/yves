@@ -1,26 +1,26 @@
 'use client'
-import { useState, useEffect, use } from 'react';
+import { useEffect, useState } from 'react';
 
-import { useFormStatus } from 'react-dom'
 import { useRouter } from 'next/navigation';
 
-import Sidebar from '../components/sidebar';
 import AppointmentCardOwnerCard from '../components/appointmentOwnerCard';
+import Sidebar from '../components/sidebar';
 
-import { AppointmentWithSchedule } from '../lib/actions'
-
+import { AppointmentWithScheduleAndUser } from '../lib/models';
 
 import {
-    Box, Button, Chip, CircularProgress, Container, Dialog, DialogActions, DialogContentText, DialogContent,
-    DialogTitle, Grid, Typography, List, ListItem, ListItemText, Divider
+    Box, CircularProgress, Container,
+    Divider,
+    Grid,
+    List, ListItem,
+    Typography
 } from '@mui/material';
 
-import { Appointment, User } from 'prisma/prisma-client'
 
 export default function AppointmentsForm() {
     const router = useRouter();
 
-    const emptyAppointments: Array<AppointmentWithSchedule> = new Array();
+    const emptyAppointments: Array<AppointmentWithScheduleAndUser> = new Array();
     const [appointmentsConfirmed, setAppointmentsConfirmed] = useState(emptyAppointments)
     const [appointmentsUnconfirmed, setAppointmentsUnconfirmed] = useState(emptyAppointments)
 
@@ -40,7 +40,7 @@ export default function AppointmentsForm() {
         setIsLoading(true);
         fetch('/api/v1/appointments/with-me')
             .then((res) => res.json())
-            .then((data: AppointmentWithSchedule[]) => {
+            .then((data: AppointmentWithScheduleAndUser[]) => {
                 setAppointmentsConfirmed(data.filter(a => a.confirmed));
                 setAppointmentsUnconfirmed(data.filter(a => !a.confirmed));
             })

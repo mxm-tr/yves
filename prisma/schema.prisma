@@ -8,37 +8,32 @@ datasource postgresDB {
   url      = env("POSTGRES_PRISMA_URL")
 }
 
+// schema.prisma
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   pseudo    String   @unique
+  coins     Int      @default(0)
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
-  // Appointments made
   bookedAppointments    Appointment[]
   bookedAppointmentsIds String[]
-
-  // Schedules owned by the user
-  schedules      Schedule[]
-
-  // Links between users
-  followers FollowingLinks[] @relation("Followers")
-  followed FollowingLinks[] @relation("Followed")
+  schedules             Schedule[]
+  followers             FollowingLinks[] @relation("Followers")
+  followed              FollowingLinks[] @relation("Followed")
 
   @@map(name: "users")
 }
 
 model Schedule {
-  id   String   @id @default(cuid())
-  date DateTime
-
-  // Who owns the schedule
-  owner   User   @relation(fields: [ownerId], references: [id])
-  ownerId String
-
-  // Appointments made on this schedule
+  id           String        @id @default(cuid())
+  date         DateTime
+  owner        User          @relation(fields: [ownerId], references: [id])
+  ownerId      String
   appointments Appointment[]
+  cost         Int           @default(0)
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")

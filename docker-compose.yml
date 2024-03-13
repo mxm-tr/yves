@@ -2,7 +2,7 @@ version: '3.8'
 services:
   app-dev:
     environment:
-      POSTGRES_PRISMA_URL: postgres://admin:${POSTGRES_ADMIN_PASSWORD:?error}@postgres:5432/yves
+      POSTGRES_PRISMA_URL: postgres://yves:${YVES_DB_PASSWORD:?error}@postgres:5432/yves
     build:
       context: .
       target: app-base
@@ -25,9 +25,11 @@ services:
       context: .
       target: db
     environment:
-      POSTGRES_DB: yves
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:?error}
+      POSTGRES_HOST_AUTH_METHOD: password
+      POSTGRES_INITDB_ARGS: --auth-host=password
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?error}
+      YVES_DB_PASSWORD: ${YVES_DB_PASSWORD:?error}
       DEX_DB_PASSWORD: ${DEX_DB_PASSWORD:?error}
     ports:
       - "5432:5432"

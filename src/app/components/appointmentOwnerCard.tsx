@@ -5,7 +5,7 @@ import { Button, Card, CardContent, Fade, Grid, Typography, Dialog, DialogTitle,
 import Alert from '@mui/material/Alert';
 import CheckIcon from '@mui/icons-material/Check';
 
-import { AppointmentWithScheduleAndUser } from '../lib/actions';
+import { AppointmentWithScheduleAndUser } from '../lib/models';
 
 const AppointmentCardOwnerCard: React.FC<{ appointment: AppointmentWithScheduleAndUser, triggerReload: Function }> = ({ appointment, triggerReload }) => {
 
@@ -139,6 +139,11 @@ const AppointmentCardOwnerCard: React.FC<{ appointment: AppointmentWithScheduleA
                         <Grid item>
                             <Typography variant="h6">
                                 ⌚ Time: {new Date(appointment.schedule.date).toLocaleTimeString(defaultLocale, { hour: '2-digit', minute: '2-digit' })}
+                            </Typography>
+                        </Grid>
+                        <Grid item>
+                            <Typography variant="h6">
+                                💰 Cost: {appointment.schedule.cost} 🪙
                             </Typography>
                         </Grid>
                         <Grid item>

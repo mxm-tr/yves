@@ -1,4 +1,4 @@
-import { getSchedulesGroupedByUserDay } from '@/app/lib/actions';
+import { getSchedulesGroupedByUserDay } from '@/app/lib/schedules';
 
 export async function GET(
   request: Request,

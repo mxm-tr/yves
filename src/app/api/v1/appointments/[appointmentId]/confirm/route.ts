@@ -1,16 +1,21 @@
-import { type NextRequest } from 'next/server'
-import { confirmAppointment } from '@/app/lib/actions';
-
+import { confirmAppointment } from '@/app/lib/appointments';
+import { InsufficientCoinsError, WalletAmountNotFoundError } from '@/app/lib/models';
 
 export async function POST(
-    request: Request,
-    { params }: { params: { appointmentId: string } }
-  ) {
-  
+  request: Request,
+  { params }: { params: { appointmentId: string } }
+) {
+  try {
     await confirmAppointment(params.appointmentId);
-  
-    return new Response('Appointment confirmed', {
-      status: 200,
-    })
+    return new Response('Appointment confirmed', { status: 200 });
+  } catch (error) {
+    if (error instanceof InsufficientCoinsError) {
+      return new Response('Insufficient coins in the wallet', { status: 400 });
+    } else if (error instanceof WalletAmountNotFoundError) {
+      return new Response('Wallet amount not found', { status: 400 });
+    } else {
+      // Handle other errors or rethrow
+      throw error;
+    }
   }
-  
+}

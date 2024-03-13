@@ -1,4 +1,4 @@
-import { getAcquaintances } from '@/app/lib/actions';
+import { getAcquaintances } from '@/app/lib/users';
 
 export async function GET() {
   // Get followed users

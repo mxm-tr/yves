@@ -3,11 +3,14 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 ## Getting Started
 
 ```bash
-export POSTGRES_ADMIN_PASSWORD=pwd; 
+# Start the database and the dev server
+export POSTGRES_PASSWORD=secret;
+export YVES_DB_PASSWORD=pwd;
 export DEX_DB_PASSWORD=lolol;
 docker-compose up -d
 
-export POSTGRES_PRISMA_URL=postgres://admin:pwd@postgres:5432/yves
+# Populate the database
+export POSTGRES_PRISMA_URL=postgres://yves:pwd@localhost:5432/yves
 npx prisma migrate dev
 npx prisma db seed
 ```

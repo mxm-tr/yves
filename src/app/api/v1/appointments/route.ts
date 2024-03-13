@@ -1,4 +1,4 @@
-import { getAppointments } from '@/app/lib/actions';
+import { getAppointments } from '@/app/lib/appointments';
 
 export async function GET() {
   const appointments = await getAppointments();

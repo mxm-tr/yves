@@ -6,7 +6,7 @@ import AppointmentCard from './components/appointmentCard';
 
 import { useEffect, useState } from 'react';
 
-import { AppointmentWithSchedule } from './lib/actions'
+import { AppointmentWithSchedule } from './lib/models'
 
 export default function Home() {
 

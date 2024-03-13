@@ -1,0 +1,7 @@
+#!/bin/bash
+set -ex
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+	CREATE USER yves WITH CREATEDB PASSWORD '$YVES_DB_PASSWORD';
+	GRANT SELECT ON ALL TABLES IN SCHEMA public TO yves;
+EOSQL
