@@ -27,9 +27,6 @@ export default function Home() {
     <Box>
       <Sidebar />
       <Container maxWidth="sm">
-        <Box>
-          <Typography variant="h1">Hello</Typography>
-        </Box>
         {/* My Appointments Section */}
         <Box>
           <Typography variant="h2">My Appointments</Typography>
@@ -58,7 +55,7 @@ export default function Home() {
 
 
         {/* Button to Schedule New Appointments */}
-        <Button variant="contained" color="primary" href="/schedule">
+        <Button variant="contained" color="primary" href="/book">
           Schedule New Appointment
         </Button>
       </Container>

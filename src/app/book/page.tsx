@@ -159,7 +159,6 @@ export default function ScheduleForm() {
                       {dates.map(date => (
                         <ListItem key={date.id}>
                           <Button
-                            scheduleId={date.id}
                             onClick={() => handleTimeSelect(date, date.id)}
                             disabled={selectedDay !== day} // Disable times for other days
                             variant={selectedTime === date ? "contained" : "outlined"}
