@@ -10,7 +10,7 @@ export async function POST(
     return new Response('Appointment confirmed', { status: 200 });
   } catch (error) {
     if (error instanceof InsufficientCoinsError) {
-      return new Response('Insufficient coins in the wallet', { status: 400 });
+      return new Response(error.message, { status: 400 });
     } else if (error instanceof WalletAmountNotFoundError) {
       return new Response('Wallet amount not found', { status: 400 });
     } else {

@@ -67,9 +67,8 @@ export async function getAppointmentsTakenWithMe() {
 }
 
 export async function cancelAppointment(appointmentId: string): Promise<void> {
-    await prisma.appointment.update({
+    await prisma.appointment.delete({
         where: { id: appointmentId },
-        data: { confirmed: false },
     });
 }
 
@@ -116,58 +115,50 @@ export async function deleteAppointment(id: string): Promise<void> {
 }
 
 export async function scheduleAppointment(scheduleId: string): Promise<string> {
-    try {
-        // TODO: Change this to current user
-        const currentUser = await prisma.user.findFirst({ where: { email: "john@example.com" } });
+    // TODO: Change this to current user
+    const currentUser = await prisma.user.findFirst({ where: { email: "john@example.com" } });
 
-        if (!currentUser) {
-            throw new Error('User not found');
-        }
-
-        // Check if the schedule exists
-        const existingSchedule = await prisma.schedule.findUnique({
-            where: { id: scheduleId },
-        });
-
-        if (!existingSchedule) {
-            // Throw a custom error for non-existing appointment
-            throw new Error('Schedule not found');
-        }
-
-        // Get the amount on the user's account
-        const walletAmount = await getUserWalletAmount(currentUser.id);
-
-
-        if (walletAmount !== null) {
-            const cost = existingSchedule.cost;
-
-            if (cost != null) {
-
-                if (walletAmount >= cost) {
-
-                    const createdAppointment = await prisma.appointment.create({
-                        data: { userId: currentUser.id, scheduleId: scheduleId, confirmed: false },
-                    });
-
-                    await updateUserWallet(currentUser.id, - cost);
-                    return createdAppointment.id;
-                } else {
-                    // Throw a custom error for insufficient coins
-                    throw new InsufficientCoinsError();
-                }
-            }
-            else {
-                throw Error("Error getting cost for the appointment")
-            }
-        }
-
-    } catch (error) {
-        // Handle errors here
-        console.error('Error in scheduleAppointment:', error);
-
-        // You can throw the error or return a specific error message
-        throw new Error('Failed to schedule appointment');
+    if (!currentUser) {
+        throw new Error('User not found');
     }
+
+    // Check if the schedule exists
+    const existingSchedule = await prisma.schedule.findUnique({
+        where: { id: scheduleId },
+    });
+
+    if (!existingSchedule) {
+        // Throw a custom error for non-existing appointment
+        throw new Error('Schedule not found');
+    }
+
+    // Get the amount on the user's account
+    const walletAmount = await getUserWalletAmount(currentUser.id);
+
+
+    if (walletAmount !== null) {
+        const cost = existingSchedule.cost;
+
+        if (cost != null) {
+
+            if (walletAmount >= cost) {
+
+                const createdAppointment = await prisma.appointment.create({
+                    data: { userId: currentUser.id, scheduleId: scheduleId, confirmed: false },
+                });
+
+                await updateUserWallet(currentUser.id, - cost);
+                return createdAppointment.id;
+            } else {
+                // Throw a custom error for insufficient coins
+                throw new InsufficientCoinsError();
+            }
+        }
+        else {
+            throw Error("Error getting cost for the appointment")
+        }
+    }
+
     return ""
 
 }

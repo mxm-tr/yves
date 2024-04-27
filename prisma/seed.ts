@@ -34,7 +34,7 @@ async function findOrCreateAppointment(userId: string, scheduleId: string, confi
     });
 }
 
-async function findOrCreateSchedule(date: Date, ownerId: string) {
+async function findOrCreateSchedule(date: Date, ownerId: string, cost: number = 0) {
     const existingSchedule = await prisma.schedule.findFirst({
         where: {
             AND: [
@@ -56,6 +56,7 @@ async function findOrCreateSchedule(date: Date, ownerId: string) {
                     id: ownerId,
                 },
             },
+            cost: cost
         },
     });
 }
@@ -85,19 +86,19 @@ async function main() {
     });
 
     // Seed Schedules
-    const schedule1 = await findOrCreateSchedule(new Date('2022-12-01T08:00:00Z'), user2.id);
+    const schedule1 = await findOrCreateSchedule(new Date('2022-12-01T08:00:00Z'), user2.id, 10);
     const schedule2 = await findOrCreateSchedule(new Date('2022-12-02T10:00:00Z'), user2.id);
-    const schedule3 = await findOrCreateSchedule(new Date('2022-12-03T10:00:00Z'), user2.id);
+    const schedule3 = await findOrCreateSchedule(new Date('2022-12-03T10:00:00Z'), user2.id, 2);
     const schedule4 = await findOrCreateSchedule(new Date('2022-12-03T11:00:00Z'), user2.id);
     const schedule5 = await findOrCreateSchedule(new Date('2022-12-02T11:00:00Z'), user1.id);
-    const schedule6 = await findOrCreateSchedule(new Date('2022-12-03T11:00:00Z'), user1.id);
+    const schedule6 = await findOrCreateSchedule(new Date('2022-12-03T11:00:00Z'), user1.id, 2);
 
     // Seed Appointments
 
     // Appointments John took with Jane
     const appointment1 = await findOrCreateAppointment(user1.id, schedule1.id, true);
     const appointment2 = await findOrCreateAppointment(user1.id, schedule2.id, false);
-    
+
     // Appointments Jane took with John
     const appointment3 = await findOrCreateAppointment(user2.id, schedule5.id, true);
     const appointment4 = await findOrCreateAppointment(user2.id, schedule6.id, false);

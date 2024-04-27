@@ -95,12 +95,12 @@ export default function ScheduleForm() {
 
       } else {
         // Handle non-successful response (e.g., display an error message)
-        console.error('Error deleting appointment. Status:', response.status);
-        setError('Error deleting appointment. Please try again later.');
+        console.error('Error scheduling appointment. Status:', response.status);
+        setError('Error scheduling appointment: ' + await response.text());
       }
     } catch (error) {
-      console.error('Error deleting appointment', error);
-      setError('Error deleting appointment. Please try again later.');
+      console.error('Error scheduling appointment', error);
+      setError('Error scheduling appointment. Please try again later.');
     } finally {
       // Hide loading state
       setIsLoading(false);
@@ -165,6 +165,12 @@ export default function ScheduleForm() {
                           >
                             {new Date(date.date).toLocaleTimeString(defaultLocale, { hour: '2-digit', minute: '2-digit' })}
                           </Button>
+                          <Chip
+                            label={`Cost: ${date.cost}`}
+                            color="primary"
+                            size="small"
+                            style={{ marginLeft: '0.5rem' }}
+                          />
                         </ListItem>
                       ))}
                     </List>
@@ -195,6 +201,20 @@ export default function ScheduleForm() {
           </DialogContent>
           <DialogActions>
             <Button onClick={handleSuccessModalClose} color="primary">
+              OK
+            </Button>
+          </DialogActions>
+        </Dialog>
+        {/* Error Modal */}
+        <Dialog open={error.length > 0} onClose={() => setError("")}>
+          <DialogTitle>Error</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              {error}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setError("")} color="primary">
               OK
             </Button>
           </DialogActions>
