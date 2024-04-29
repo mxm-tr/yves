@@ -15,7 +15,7 @@ import { Schedule, User } from 'prisma/prisma-client'
 export default function ScheduleForm() {
   const router = useRouter();
 
-  const emptySchedules: Map<String, Schedule[]> = new Map();
+  const emptySchedules: Map<string, Schedule[]> = new Map();
   const [availableSchedules, setAvailableSchedules] = useState(emptySchedules)
 
   const emptyUsers: User[] = new Array();

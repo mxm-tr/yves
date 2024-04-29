@@ -71,6 +71,7 @@ async function main() {
         create: {
             pseudo: 'John Doe',
             email: 'john@example.com',
+            coins: 5
         },
     });
 

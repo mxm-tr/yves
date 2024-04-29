@@ -1,6 +1,17 @@
 import { PrismaClient } from '@prisma/client';
 
+import { User } from '@prisma/client';
+
 const prisma = new PrismaClient();
+
+// Function to get the amount on the user's account
+export async function getCurrentUser(): Promise<User | undefined> {
+  // TODO: Change this to current user
+  const currentUser = await prisma.user.findFirst({ where: { email: "john@example.com" } });
+  if (currentUser) {
+    return currentUser
+  }
+}
 
 // Function to get the amount on the user's account
 export async function getUserWalletAmount(userId: string): Promise<number | null> {
