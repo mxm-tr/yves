@@ -7,10 +7,12 @@ import Sidebar from '../components/sidebar';
 
 import {
   Box, Button, Chip, CircularProgress, Container, Dialog, DialogActions, DialogContentText, DialogContent,
-  DialogTitle, Typography, List, ListItem, ListItemText, Divider
+  DialogTitle, Typography, List, ListItem, ListItemText, Divider,
+  TextField
 } from '@mui/material';
 
 import { Schedule, User } from 'prisma/prisma-client'
+import { Event } from 'react-big-calendar';
 
 export default function ScheduleForm() {
   const router = useRouter();
@@ -18,8 +20,7 @@ export default function ScheduleForm() {
   const emptySchedules: Map<string, Schedule[]> = new Map();
   const [availableSchedules, setAvailableSchedules] = useState(emptySchedules)
 
-  const emptyUsers: User[] = new Array();
-  const [relatedUsers, setRelatedUsers] = useState(emptyUsers)
+  const [relatedUsers, setRelatedUsers] = useState<User[]>()
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -107,6 +108,22 @@ export default function ScheduleForm() {
     }
   }
 
+  // State to hold the search query
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Function to filter users based on search query
+  const filteredUsers = () => {
+    return relatedUsers && relatedUsers.filter(user =>
+      user.pseudo.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || []
+  }
+
+  // Function to handle search query change
+  const handleSearchChange = (event) => {
+    console.log(event.target.value);
+    setSearchQuery(event.target.value);
+  };
+
   return (
     <Box>
       <Sidebar />
@@ -121,21 +138,34 @@ export default function ScheduleForm() {
           <Chip label={scheduleOwner.pseudo} onDelete={() => setScheduleOwner(undefined)} />
           :
           <Box>
-            {!isLoading && relatedUsers.length > 0 ?
+            {!isLoading && relatedUsers && relatedUsers.length > 0 ?
               <Box>
                 <Typography variant="h2">People you know</Typography>
-                <List>
-                  {relatedUsers.map((relatedUser) => (
-                    <ListItem key={relatedUser.id}>
-                      <Button
-                        onClick={() => handleSelectUser(relatedUser)}
-                      >
-                        {relatedUser.pseudo}
-                      </Button>
-                      <Divider />
-                    </ListItem>
-                  ))}
-                </List>
+                <Box>
+                  <Box marginBottom={2}>
+                    <TextField
+                      label="Search for people"
+                      variant="outlined"
+                      fullWidth
+                      value={searchQuery}
+                      onChange={handleSearchChange}
+                    />
+                  </Box>
+                </Box>
+                {filteredUsers() && filteredUsers().length > 0 ? (
+                  <List>
+                    {filteredUsers().map((relatedUser) => (
+                      <ListItem key={relatedUser.id}>
+                        <Button onClick={() => handleSelectUser(relatedUser)}>
+                          {relatedUser.pseudo}
+                        </Button>
+                        <Divider />
+                      </ListItem>
+                    ))}
+                  </List>
+                ):(
+                  <Typography variant="h6">No user found, fix your search filter!</Typography>
+                )}
               </Box>
               : <Typography variant="h6">Oh no you don&apos;t know anyone yet!</Typography>}
           </Box>

@@ -128,6 +128,11 @@ const AppointmentCardOwnerCard: React.FC<{ appointment: AppointmentWithScheduleA
                     <Grid container direction="column" alignItems="center" spacing={2}>
                         <Grid item>
                             <Typography variant="h6">
+                                {appointment.confirmed ? "✅ Confirmed" : "Pending confirmation ⌛"}
+                            </Typography>
+                        </Grid>
+                        <Grid item>
+                            <Typography variant="h6">
                                 🐸 Booked by: {appointment.user.pseudo}
                             </Typography>
                         </Grid>

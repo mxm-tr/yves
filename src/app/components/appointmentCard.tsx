@@ -71,6 +71,11 @@ const AppointmentCard: React.FC<{ appointment: AppointmentWithSchedule }> = ({ a
                         <Grid container direction="column" alignItems="center" spacing={2}>
                             <Grid item>
                                 <Typography variant="h6">
+                                    {appointment.confirmed ? "✅ Confirmed" : "Pending confirmation ⌛"}
+                                </Typography>
+                            </Grid>
+                            <Grid item>
+                                <Typography variant="h6">
                                     🐸 With: {appointment.schedule.owner.pseudo}
                                 </Typography>
                             </Grid>
