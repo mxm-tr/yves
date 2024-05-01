@@ -8,7 +8,8 @@ import Sidebar from '../components/sidebar';
 import {
   Box, Button, Chip, CircularProgress, Container, Dialog, DialogActions, DialogContentText, DialogContent,
   DialogTitle, Typography, List, ListItem, ListItemText, Divider,
-  TextField
+  TextField,
+  Grid
 } from '@mui/material';
 
 import { Schedule, User } from 'prisma/prisma-client'
@@ -127,101 +128,113 @@ export default function ScheduleForm() {
   return (
     <Box>
       <Sidebar />
-      <Container maxWidth="sm">
-        <Typography variant="h1">Schedule New Appointment</Typography>
+      <Grid container
+        justifyContent="center"
+        alignItems="center"
+        rowSpacing={3}
+        columnSpacing={2}>
 
-        {/* Loading Spinner */}
-        {isLoading && <CircularProgress />}
+        <Grid item xs={12} textAlign="center">
+          <Typography variant="h2">Book an appointment</Typography>
+
+          {/* Loading Spinner */}
+          {isLoading && <CircularProgress />}
+        </Grid>
 
         {/* List of acquaintances */}
-        {scheduleOwner ?
-          <Chip label={scheduleOwner.pseudo} onDelete={() => setScheduleOwner(undefined)} />
-          :
-          <Box>
-            {!isLoading && relatedUsers && relatedUsers.length > 0 ?
-              <Box>
-                <Typography variant="h2">People you know</Typography>
+        <Grid item xs={4} textAlign="center">
+          {!scheduleOwner &&
+            <Box>
+              {!isLoading && relatedUsers && relatedUsers.length > 0 ?
                 <Box>
-                  <Box marginBottom={2}>
-                    <TextField
-                      label="Search for people"
-                      variant="outlined"
-                      fullWidth
-                      value={searchQuery}
-                      onChange={handleSearchChange}
-                    />
+                  <Typography variant="h2">Who with?</Typography>
+                  <Box>
+                    <Box marginBottom={2}>
+                      <TextField
+                        label="Search for people"
+                        variant="outlined"
+                        fullWidth
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                      />
+                    </Box>
                   </Box>
-                </Box>
-                {filteredUsers() && filteredUsers().length > 0 ? (
-                  <List>
-                    {filteredUsers().map((relatedUser) => (
-                      <ListItem key={relatedUser.id}>
-                        <Button onClick={() => handleSelectUser(relatedUser)}>
-                          {relatedUser.pseudo}
-                        </Button>
-                        <Divider />
-                      </ListItem>
-                    ))}
-                  </List>
-                ):(
-                  <Typography variant="h6">No user found, fix your search filter!</Typography>
-                )}
-              </Box>
-              : <Typography variant="h6">Oh no you don&apos;t know anyone yet!</Typography>}
-          </Box>
-        }
-
-        {/* Available Schedules */}
-        {scheduleOwner ?
-          <section>
-            <Typography variant="h2">Available Schedules</Typography>
-            {!isLoading && Array.from(availableSchedules).length > 0 ?
-              <List>
-                {Array.from(availableSchedules).map(([day, dates]) => (
-                  <ListItem key={day}>
-                    <Button
-                      onClick={() => handleDaySelect(day)}
-                      variant={selectedDay === day ? "contained" : "outlined"}
-                    >
-                      {new Date(day).toLocaleDateString(defaultLocale)}
-                    </Button>
+                  {filteredUsers() && filteredUsers().length > 0 ? (
                     <List>
-                      {dates.map(date => (
-                        <ListItem key={date.id}>
-                          <Button
-                            onClick={() => handleTimeSelect(date, date.id)}
-                            disabled={selectedDay !== day} // Disable times for other days
-                            variant={selectedTime === date ? "contained" : "outlined"}
-                          >
-                            {new Date(date.date).toLocaleTimeString(defaultLocale, { hour: '2-digit', minute: '2-digit' })}
+                      {filteredUsers().map((relatedUser) => (
+                        <ListItem key={relatedUser.id}>
+                          <Button onClick={() => handleSelectUser(relatedUser)}>
+                            {relatedUser.pseudo}
                           </Button>
-                          <Chip
-                            label={`Cost: ${date.cost}`}
-                            color="primary"
-                            size="small"
-                            style={{ marginLeft: '0.5rem' }}
-                          />
+                          <Divider />
                         </ListItem>
                       ))}
                     </List>
-                    <Divider />
-                  </ListItem>
-                ))}
-              </List>
-              : <Typography variant="h6">No more schedule available for {scheduleOwner.pseudo}</Typography>}
-          </section>
-          : ""}
+                  ) : (
+                    <Typography variant="h6">No user found, fix your search filter!</Typography>
+                  )}
+                </Box>
+                : <Typography variant="h6">Oh no you don&apos;t know anyone yet!</Typography>}
+            </Box>
+          }
 
-        {/* Button to Schedule Appointment */}
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleScheduleAppointment}
-          disabled={!selectedDay || !selectedTime}
-          aria-disabled={isLoading}
-        >
-          Schedule Appointment
-        </Button>
+
+          {/* Available Schedules */}
+          {scheduleOwner ?
+            <section>
+              <Typography variant="h2">When do you want to meet&nbsp;&nbsp;
+                <b><Chip label={scheduleOwner.pseudo} onDelete={() => setScheduleOwner(undefined)} /></b>
+                &nbsp;&nbsp;?
+              </Typography>
+              {!isLoading && Array.from(availableSchedules).length > 0 ?
+                <List>
+                  {Array.from(availableSchedules).map(([day, dates]) => (
+                    <ListItem key={day}>
+                      <Button
+                        onClick={() => handleDaySelect(day)}
+                        variant={selectedDay === day ? "contained" : "outlined"}
+                      >
+                        {new Date(day).toLocaleDateString(defaultLocale)}
+                      </Button>
+                      <List>
+                        {dates.map(date => (
+                          <ListItem key={date.id}>
+                            <Button
+                              onClick={() => handleTimeSelect(date, date.id)}
+                              disabled={selectedDay !== day} // Disable times for other days
+                              variant={selectedTime === date ? "contained" : "outlined"}
+                            >
+                              {new Date(date.date).toLocaleTimeString(defaultLocale, { hour: '2-digit', minute: '2-digit' })}
+                            </Button>
+                            <Chip
+                              label={`Cost: ${date.cost}`}
+                              color="primary"
+                              size="small"
+                              style={{ marginLeft: '0.5rem' }}
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+                      <Divider />
+                    </ListItem>
+                  ))}
+                </List>
+                : <Typography variant="h6">No more schedule available for {scheduleOwner.pseudo}</Typography>}
+            </section>
+            : ""}
+
+          {/* Button to Schedule Appointment */}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleScheduleAppointment}
+            disabled={!selectedDay || !selectedTime}
+            aria-disabled={isLoading}
+          >
+            Schedule Appointment
+          </Button>
+        </Grid>
+
         <Dialog open={successModalOpen} onClose={handleSuccessModalClose}>
           <DialogTitle>Appointment Scheduled Successfully</DialogTitle>
           <DialogContent>
@@ -249,7 +262,7 @@ export default function ScheduleForm() {
             </Button>
           </DialogActions>
         </Dialog>
-      </Container>
+      </Grid>
     </Box>
   );
 }

@@ -58,7 +58,6 @@ export default function AppointmentsForm() {
                 alignItems="center"
                 rowSpacing={3}
                 columnSpacing={2}>
-                <Typography variant="h1"></Typography>
 
                 <Grid item xs={12}>
                     {/* Appointments Section */}
