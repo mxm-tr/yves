@@ -133,7 +133,7 @@ const AppointmentCardOwnerCard: React.FC<{ appointment: AppointmentWithScheduleA
                         </Grid>
                         <Grid item>
                             <Typography variant="h6">
-                                🐸 Booked by: {appointment.user.pseudo}
+                                🐸 Booked by: {appointment.user.name}
                             </Typography>
                         </Grid>
                         <Grid item>

@@ -1,11 +1,19 @@
+import { auth } from "@/app/auth"
 import { cancelAppointment } from '@/app/lib/appointments';
+import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(
   request: Request,
   { params }: { params: { appointmentId: string } }
 ) {
 
-  await cancelAppointment(params.appointmentId);
+  const session = await auth();
+
+  if (!session || !session.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  await cancelAppointment(session.user.id, params.appointmentId);
 
   return new Response('Appointment cancelled', {
     status: 200,

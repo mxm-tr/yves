@@ -5,9 +5,9 @@ import { User } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // Function to get the amount on the user's account
-export async function getCurrentUser(): Promise<User | undefined> {
+export async function getCurrentUser(userId: string): Promise<User | undefined> {
   // TODO: Change this to current user
-  const currentUser = await prisma.user.findFirst({ where: { email: "john@example.com" } });
+  const currentUser = await prisma.user.findFirst({ where: { id: userId } });
   if (currentUser) {
     return currentUser
   }
@@ -32,9 +32,8 @@ export async function updateUserWallet(userId: string, amount: number): Promise<
 }
 
 
-export async function getAcquaintances(): Promise<User[]> {
-  // TODO: Change this to current user
-  const currentUser = await prisma.user.findFirst({ where: { email: "john@example.com" } });
+export async function getAcquaintances(userId: string): Promise<User[]> {
+  const currentUser = await prisma.user.findFirst({ where: { id: userId } });
   return prisma.user.findMany({
     relationLoadStrategy: 'join', // or 'query'
     include: {
@@ -44,7 +43,7 @@ export async function getAcquaintances(): Promise<User[]> {
           follower: {
             select: {
               id: true,
-              pseudo: true,
+              name: true,
             }
           }
         }
@@ -55,7 +54,7 @@ export async function getAcquaintances(): Promise<User[]> {
           followed: {
             select: {
               id: true,
-              pseudo: true,
+              name: true,
             }
           }
         }

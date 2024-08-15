@@ -69,7 +69,7 @@ async function main() {
         },
         update: {},
         create: {
-            pseudo: 'John Doe',
+            name: 'John Doe',
             email: 'john@example.com',
             coins: 5
         },
@@ -81,7 +81,7 @@ async function main() {
         },
         update: {},
         create: {
-            pseudo: 'Jane Doe',
+            name: 'Jane Doe',
             email: 'jane@example.com',
         },
     });

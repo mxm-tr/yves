@@ -1,8 +1,7 @@
-version: '3.8'
 services:
   app-dev:
     environment:
-      POSTGRES_PRISMA_URL: postgres://yves:${YVES_DB_PASSWORD:?error}@postgres:5432/yves
+      POSTGRES_PRISMA_URL: postgres://yves:${YVES_DB_PASSWORD:?error}@postgres-dev:5432/yves
     build:
       context: .
       target: app-base
@@ -10,17 +9,18 @@ services:
       - sh
       - -c
     command:
-      - ./node_modules/.bin/prisma generate && npm run dev
+      - ./node_modules/.bin/prisma migrate dev && npm run dev
     env_file:
-      - dev.env
-    user: "${UID}:${GID}"
+      - .env.local
     ports:
       - "3000:3000"
     volumes:
       - ./src:/app/src:ro
     depends_on:
-      - postgres
-  postgres:
+      - postgres-dev
+    profiles: ["dev"]
+
+  postgres-dev:
     build:
       context: .
       target: db
@@ -34,22 +34,32 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-  dex:
-    image: "dexidp/dex:v2.38.0-distroless"
-    container_name: dex
+      - postgres_data_dev:/var/lib/postgresql/data
+    profiles: ["dev"]
+
+  app-prod:
     environment:
-      DEX_DB_PASSWORD: ${DEX_DB_PASSWORD:?error}
-    ports:
-      - "5556:5556"
-    configs:
-      - source: dex_config
-        target: /etc/dex/config.yaml
-    command: ["dex", "serve", "/etc/dex/config.yaml"]
+      POSTGRES_PRISMA_URL: postgres://yves:${YVES_DB_PASSWORD:?error}@postgres-prod:5432/yves
+    image: ghcr.io/mxm-tr/yves:master-app
+    env_file:
+      - .env.prod
     depends_on:
-      - postgres
+      - postgres-prod
+    profiles: ["prod"]
+
+  postgres-prod:
+    image: ghcr.io/mxm-tr/yves:master-db
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: password
+      POSTGRES_INITDB_ARGS: --auth-host=password
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?error}
+      YVES_DB_PASSWORD: ${YVES_DB_PASSWORD:?error}
+      DEX_DB_PASSWORD: ${DEX_DB_PASSWORD:?error}
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    profiles: ["prod"]
+
 volumes:
-  postgres_data:
-configs:
-  dex_config:
-    file: ./dex/config.yaml
+  postgres_data_dev:
+  postgres_data_prod:

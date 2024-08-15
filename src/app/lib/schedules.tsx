@@ -3,10 +3,8 @@ import { PrismaClient, Appointment, Schedule, User } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function getSchedules(userId: string): Promise<Schedule[]> {
-    // TODO: Change this to current user
-    const currentUser = await prisma.user.findFirst({ where: { email: "john@example.com" } });
-
+export async function getSingleUserSchedules(currentUserId: string, userId: string): Promise<Schedule[]> {
+    const currentUser = await prisma.user.findFirst({ where: { id: currentUserId } });
     return prisma.schedule.findMany({
         relationLoadStrategy: 'join', // or 'query'
         include: {
@@ -37,8 +35,8 @@ export async function getSchedules(userId: string): Promise<Schedule[]> {
     });
 }
 
-export async function getSchedulesGroupedByUserDay(userId: string): Promise<{ [key: string]: Schedule[] }> {
-    const schedules = await getSchedules(userId)
+export async function getSchedulesGroupedByUserDay(currentUserId: string, userId: string): Promise<{ [key: string]: Schedule[] }> {
+    const schedules = await getSingleUserSchedules(currentUserId, userId)
 
     // Group schedules by day
     const groupedSchedules: { [key: string]: Schedule[] } = {};

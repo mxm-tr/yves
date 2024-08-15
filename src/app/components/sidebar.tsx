@@ -13,7 +13,6 @@ import ListItemText from '@mui/material/ListItemText';
 import CalendarIcon from '@mui/icons-material/CalendarMonth';
 import HomeIcon from '@mui/icons-material/Home';
 
-import UserCard from './userCard';
 
 export default function Sidebar() {
     const [drawerOpen, setdrawerOpen] = React.useState(false);
@@ -38,7 +37,6 @@ export default function Sidebar() {
             onClick={toggleDrawer()}
             onKeyDown={toggleDrawer()}
         >
-            <UserCard/>
             <List>
                 <ListItem key="home" disablePadding>
                     <ListItemIcon><HomeIcon /></ListItemIcon>

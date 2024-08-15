@@ -8,9 +8,8 @@ import { InsufficientCoinsError } from './models';
 
 const prisma = new PrismaClient();
 
-export async function getAppointments() {
-    // TODO: Change this to current user
-    const currentUser = await prisma.user.findFirst({ where: { email: "john@example.com" } });
+export async function getAppointments(userId: string) {
+    const currentUser = await prisma.user.findFirst({ where: { id: userId } });
 
     return prisma.appointment.findMany({
         relationLoadStrategy: 'join', // or 'query'
@@ -20,7 +19,7 @@ export async function getAppointments() {
                     owner: {
                         select: {
                             id: true,
-                            pseudo: true
+                            name: true
                         }
                     }
                 }
@@ -33,9 +32,8 @@ export async function getAppointments() {
     });
 }
 
-export async function getAppointmentsTakenWithMe() {
-    // TODO: Change this to current user
-    const currentUser = await prisma.user.findFirst({ where: { email: "john@example.com" } });
+export async function getAppointmentsTakenWithMe(userId: string) {
+    const currentUser = await prisma.user.findFirst({ where: { id: userId } });
 
     return prisma.appointment.findMany({
         relationLoadStrategy: 'join', // or 'query'
@@ -43,7 +41,7 @@ export async function getAppointmentsTakenWithMe() {
             user: {
                 select: {
                     id: true,
-                    pseudo: true
+                    name: true
                 }
             },
             schedule: {
@@ -51,7 +49,7 @@ export async function getAppointmentsTakenWithMe() {
                     owner: {
                         select: {
                             id: true,
-                            pseudo: true
+                            name: true
                         }
                     }
                 }
@@ -66,16 +64,16 @@ export async function getAppointmentsTakenWithMe() {
     });
 }
 
-export async function cancelAppointment(appointmentId: string): Promise<void> {
+export async function cancelAppointment(userId: string, appointmentId: string): Promise<void> {
     await prisma.appointment.delete({
-        where: { id: appointmentId },
+        where: { id: appointmentId, userId: userId },
     });
 }
 
 // Function to confirm an appointment only if the user's wallet has enough coins
-export async function confirmAppointment(appointmentId: string): Promise<void> {
+export async function confirmAppointment(userId: string, appointmentId: string): Promise<void> {
     // Get the current user
-    const currentUser = await prisma.user.findFirst({ where: { email: 'john@example.com' } });
+    const currentUser = await prisma.user.findFirst({ where: { id: userId } });
 
     if (!currentUser) {
         throw new Error('User not found');
@@ -110,13 +108,12 @@ export async function writeAppointment(newAppointment: Appointment): Promise<voi
     await prisma.appointment.create({ data: newAppointment });
 }
 
-export async function deleteAppointment(id: string): Promise<void> {
-    await prisma.appointment.delete({ where: { id } });
+export async function deleteAppointment(userId: string, appointmentId: string): Promise<void> {
+    await prisma.appointment.delete({ where: { id: appointmentId, userId: userId } });
 }
 
-export async function scheduleAppointment(scheduleId: string): Promise<string> {
-    // TODO: Change this to current user
-    const currentUser = await prisma.user.findFirst({ where: { email: "john@example.com" } });
+export async function scheduleAppointment(userId: string, scheduleId: string): Promise<string> {
+    const currentUser = await prisma.user.findFirst({ where: { id: userId } });
 
     if (!currentUser) {
         throw new Error('User not found');

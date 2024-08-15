@@ -7,7 +7,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 export POSTGRES_PASSWORD=secret;
 export YVES_DB_PASSWORD=pwd;
 export DEX_DB_PASSWORD=lolol;
-docker compose up -d
+docker compose --profile dev up -d
 
 # Populate the database
 export POSTGRES_PRISMA_URL=postgres://yves:pwd@localhost:5432/yves

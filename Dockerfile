@@ -29,13 +29,14 @@ COPY --chown=app:app . .
 FROM app-base as prod-build
 
 # Build the Next.js app
-RUN npm run build
+RUN ./node_modules/.bin/prisma generate && npm run build
 
 # Expose the port that the app will run on
 EXPOSE 3000
 
 # Define the command to start the app
-CMD ["npm", "start"]
+ENTRYPOINT [ "/bin/sh", "-c" ]
+CMD ["./node_modules/.bin/prisma migrate deploy && npm start"]
 
 
 FROM postgres:16.2-alpine AS db

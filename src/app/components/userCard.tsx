@@ -4,15 +4,19 @@ import { useRouter } from 'next/router';
 import { Box, CircularProgress, Container, Card, CardContent, Typography } from '@mui/material';
 
 import { User } from '@prisma/client';
+import { SignOutButton } from './signIn';
+import { SessionContextValue } from "next-auth/react"
 
-export default function UserCard() {
+export default function UserCard(session: any): React.JSX.Element {
     const [user, setUser] = useState<User>();
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await fetch('/api/v1/me');
+                const response = await fetch(
+                    '/api/v1/me'
+                );
                 if (response.ok) {
                     const userData = await response.json();
                     setUser(userData);
@@ -42,11 +46,12 @@ export default function UserCard() {
                         <Card>
                             <CardContent>
                                 <Typography variant="h5" component="h2">
-                                    {user.pseudo}
+                                    {user.name}
                                 </Typography>
                                 <Typography color="textSecondary">
                                     💰 {user.coins} coins 🪙
                                 </Typography>
+                                <SignOutButton />
                             </CardContent>
                         </Card>
                     )
@@ -62,6 +67,7 @@ export default function UserCard() {
                                 💰 -- coins 🪙
                             </Typography>
                         </CardContent>
+
                     </Card>
                 )))
                 /* Display nothing if user data is not available */

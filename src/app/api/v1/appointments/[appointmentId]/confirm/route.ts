@@ -1,12 +1,21 @@
+import { auth } from "@/app/auth"
 import { confirmAppointment } from '@/app/lib/appointments';
 import { InsufficientCoinsError, WalletAmountNotFoundError } from '@/app/lib/models';
+import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(
   request: Request,
   { params }: { params: { appointmentId: string } }
 ) {
   try {
-    await confirmAppointment(params.appointmentId);
+
+    const session = await auth();
+
+    if (!session || !session.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    await confirmAppointment(session.user.id, params.appointmentId);
     return new Response('Appointment confirmed', { status: 200 });
   } catch (error) {
     if (error instanceof InsufficientCoinsError) {

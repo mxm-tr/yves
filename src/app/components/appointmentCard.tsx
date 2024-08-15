@@ -76,7 +76,7 @@ const AppointmentCard: React.FC<{ appointment: AppointmentWithSchedule }> = ({ a
                             </Grid>
                             <Grid item>
                                 <Typography variant="h6">
-                                    🐸 With: {appointment.schedule.owner.pseudo}
+                                    🐸 With: {appointment.schedule.owner.name}
                                 </Typography>
                             </Grid>
                             <Grid item>
