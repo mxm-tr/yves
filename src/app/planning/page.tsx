@@ -1,5 +1,5 @@
 import { auth } from "@/app/auth"
-import AppointmentsForm from "@/app/appointments/appointments"
+import Planning from "./planning"
 import { SessionProvider } from "next-auth/react"
 
 export default async function ClientPage() {
@@ -16,7 +16,7 @@ export default async function ClientPage() {
 
   return (
     <SessionProvider basePath={"/api/auth"} session={session}>
-      <AppointmentsForm />
+      <Planning />
     </SessionProvider>
   )
 }

@@ -1,5 +1,4 @@
 'use client'
-// components/AppointmentCard.js
 import React, { useState } from 'react';
 import { Button, Card, CardContent, Fade, Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@mui/material';
 import Alert from '@mui/material/Alert';
@@ -7,7 +6,7 @@ import CheckIcon from '@mui/icons-material/Check';
 
 import { AppointmentWithSchedule } from '../lib/models';
 
-const AppointmentCard: React.FC<{ appointment: AppointmentWithSchedule }> = ({ appointment }) => {
+const AppointmentCard: React.FC<{ appointment: AppointmentWithSchedule, onDelete: () => void }> = ({ appointment, onDelete }) => {
 
     const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [isDeleted, setIsDeleted] = useState(false);
@@ -30,12 +29,14 @@ const AppointmentCard: React.FC<{ appointment: AppointmentWithSchedule }> = ({ a
             const response = await fetch(`/api/v1/appointments/${appointment.id}`, { method: 'DELETE' });
 
             if (response.ok) {
-
                 // If the response status is 200 OK, set isDeleted to true to hide the card
                 setIsDeleted(true);
 
                 // Show success alert
                 setShowSuccessAlert(true);
+
+                // Notify parent component to reload
+                onDelete();
 
             } else {
                 // Handle non-successful response (e.g., display an error message)
@@ -90,11 +91,6 @@ const AppointmentCard: React.FC<{ appointment: AppointmentWithSchedule }> = ({ a
                                 </Typography>
                             </Grid>
                             <Grid item>
-                                <Typography variant="h6">
-                                    💰 Cost: {appointment.schedule.cost} 🪙
-                                </Typography>
-                            </Grid>
-                            <Grid item>
                                 <Button
                                     variant="outlined"
                                     color="primary"
@@ -131,8 +127,8 @@ const AppointmentCard: React.FC<{ appointment: AppointmentWithSchedule }> = ({ a
 
             {/* Success Alert */}
             <Fade
-                in={showSuccessAlert} //Write the needed condition here to make it appear
-                timeout={{ enter: 1000, exit: 1000 }} //Edit these two values to change the duration of transition when the element is getting appeared and disappeard
+                in={showSuccessAlert}
+                timeout={{ enter: 1000, exit: 1000 }}
                 addEndListener={() => {
                     setTimeout(() => {
                         setShowSuccessAlert(false)
@@ -147,7 +143,6 @@ const AppointmentCard: React.FC<{ appointment: AppointmentWithSchedule }> = ({ a
                     Deletion successful!
                 </Alert>
             </Fade>
-
 
             {/* Error Modal */}
             {error && (

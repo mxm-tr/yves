@@ -27,7 +27,7 @@ import UserCard from '../components/userCard';
 export default function AppointmentsForm() {
     const session = useSession()
 
-    const [appointments, setAppointments] = useState<Array<AppointmentWithScheduleAndUser>>();
+    const [appointmentsWithMe, setAppointmentsWithMe] = useState<Array<AppointmentWithScheduleAndUser>>([]);
 
     const [isLoading, setIsLoading] = useState(false);
     const [reload, setReload] = useState(false);
@@ -46,13 +46,13 @@ export default function AppointmentsForm() {
         fetch('/api/v1/appointments/with-me')
             .then((res) => res.json())
             .then((data: AppointmentWithScheduleAndUser[]) => {
-                setAppointments(data);
+                setAppointmentsWithMe(data);
+                setIsLoading(false);
             })
-        setIsLoading(false);
     }, [reload])
 
-    const appointmentsConfirmed = () => appointments ? appointments.filter(a => a.confirmed) : [];
-    const appointmentsUnconfirmed = () => appointments ? appointments.filter(a => !a.confirmed) : [];
+    const appointmentsWithMeConfirmed = () => Array.isArray(appointmentsWithMe) ? appointmentsWithMe.filter(a => a.confirmed) : [];
+    const appointmentsUnconfirmedWithMe = () => Array.isArray(appointmentsWithMe) ? appointmentsWithMe.filter(a => !a.confirmed) : [];
 
     return (
         <Box>
@@ -66,11 +66,6 @@ export default function AppointmentsForm() {
                     <Sidebar />
                 </Grid>
 
-                <Grid item xs={6} />
-
-                <Grid item xs="auto">
-                    {session.status === 'authenticated' ? <UserCard session={session} /> : <SignIn />}
-                </Grid>
             </Grid>
 
             <Grid container
@@ -82,7 +77,7 @@ export default function AppointmentsForm() {
                 <Grid item xs={12}>
                     {/* Appointments Section */}
                     <Box p={2} mb={2} textAlign="center">
-                        <Typography variant="h2">Appointment with you</Typography>
+                        <Typography variant="h2">Appointments taken with you</Typography>
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
@@ -90,26 +85,24 @@ export default function AppointmentsForm() {
                     {/* Loading Spinner */}
                     {isLoading && <CircularProgress />}
 
-
                     {/* No Appointments Message */}
                     <Box textAlign="center">
                         <Typography variant="body1">Manage the appointments taken with you.</Typography>
                     </Box>
                 </Grid>
-
                 {/* Available Appointments */}
                 <Grid item xs={8}>
                     <Paper elevation={2}>
                         <Accordion elevation={2} defaultExpanded={true}>
                             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                                 <Box p={2} mb={2} width="100%">
-                                    <Typography variant="h4">⌛ Pending Appointments ({appointmentsUnconfirmed().length})</Typography>
+                                    <Typography variant="h4">⌛ Appointments to confirm ({appointmentsUnconfirmedWithMe().length})</Typography>
                                 </Box>
                             </AccordionSummary>
                             <AccordionDetails>
-                                {!isLoading && Array.from(appointmentsUnconfirmed()).length > 0 ? (
+                                {!isLoading && Array.from(appointmentsUnconfirmedWithMe()).length > 0 ? (
                                     <List>
-                                        {appointmentsUnconfirmed().map((appointment) => (
+                                        {appointmentsUnconfirmedWithMe().map((appointment) => (
                                             <ListItem key={appointment.id}>
                                                 <Grid item xs={5} key={appointment.id}>
                                                     <AppointmentCardOwnerCard appointment={appointment} triggerReload={triggerReload} />
@@ -127,18 +120,17 @@ export default function AppointmentsForm() {
                 </Grid>
                 <Grid item xs={8}>
                     <Paper elevation={2}>
-
                         <Accordion>
                             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                                 <Box p={2} mb={2} width="100%">
-                                    <Typography variant="h4">✅ Confirmed Appointments ({appointmentsConfirmed().length})</Typography>
+                                    <Typography variant="h4">✅ Confirmed Appointments ({appointmentsWithMeConfirmed().length})</Typography>
                                 </Box>
                             </AccordionSummary>
                             <AccordionDetails>
 
-                                {!isLoading && Array.from(appointmentsConfirmed()).length > 0 ?
+                                {!isLoading && Array.from(appointmentsWithMeConfirmed()).length > 0 ?
                                     <List>
-                                        {appointmentsConfirmed().map((appointment) => (
+                                        {appointmentsWithMeConfirmed().map((appointment) => (
                                             <ListItem key={appointment.id}>
                                                 <Grid item xs={5} key={appointment.id}>
                                                     <AppointmentCardOwnerCard appointment={appointment} triggerReload={triggerReload} />

@@ -76,7 +76,7 @@ export default function ScheduleForm() {
         // Close the success modal
         setSuccessModalOpen(false);
         // Redirect to the home page
-        router.push('/');
+        router.push('/planning');
     };
 
 
@@ -141,11 +141,6 @@ export default function ScheduleForm() {
                     <Sidebar />
                 </Grid>
 
-                <Grid item xs={6} />
-
-                <Grid item xs="auto">
-                    {session.status === 'authenticated' ? <UserCard session={session} /> : <SignIn />}
-                </Grid>
             </Grid>
 
             <Grid container
@@ -155,8 +150,6 @@ export default function ScheduleForm() {
                 columnSpacing={2}>
 
                 <Grid item xs={12} textAlign="center">
-                    <Typography variant="h2">Book an appointment</Typography>
-
                     {/* Loading Spinner */}
                     {isLoading && <CircularProgress />}
                 </Grid>
@@ -167,18 +160,7 @@ export default function ScheduleForm() {
                         <Box>
                             {!isLoading && relatedUsers && relatedUsers.length > 0 ?
                                 <Box>
-                                    <Typography variant="h2">Who with?</Typography>
-                                    <Box>
-                                        <Box marginBottom={2}>
-                                            <TextField
-                                                label="Search for people"
-                                                variant="outlined"
-                                                fullWidth
-                                                value={searchQuery}
-                                                onChange={handleSearchChange}
-                                            />
-                                        </Box>
-                                    </Box>
+                                    <Typography variant="h2">Who do you want to meet?</Typography>
                                     {filteredUsers() && filteredUsers().length > 0 ? (
                                         <List>
                                             {filteredUsers().map((relatedUser) => (
@@ -193,8 +175,25 @@ export default function ScheduleForm() {
                                     ) : (
                                         <Typography variant="h6">No user found, fix your search filter!</Typography>
                                     )}
+                                    <Box>
+                                        <Box marginBottom={2}>
+                                            <TextField
+                                                label="Search for people"
+                                                variant="outlined"
+                                                fullWidth
+                                                value={searchQuery}
+                                                onChange={handleSearchChange}
+                                            />
+                                        </Box>
+                                    </Box>
                                 </Box>
-                                : <Typography variant="h6">Oh no you don&apos;t know anyone yet!</Typography>}
+                                : (
+                                    session.status === 'authenticated' ?
+                                        <Typography variant="h6">Oh no you don&apos;t know anyone yet!</Typography>
+                                        :
+                                        <Typography variant="h6">Sign in to book an appointment!</Typography>
+                                )
+                            }
                         </Box>
                     }
 
