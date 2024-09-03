@@ -4,38 +4,8 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-async function findOrCreateAppointment(userId: string, scheduleId: string, confirmed: boolean) {
-    const existingAppointment = await prisma.appointment.findFirst({
-        where: {
-            AND: [
-                { userId: { equals: userId } },
-                { scheduleId: { equals: scheduleId } },
-            ],
-        },
-    });
-
-    if (existingAppointment) {
-        return existingAppointment;
-    }
-    return prisma.appointment.create({
-        data: {
-            user: {
-                connect: {
-                    id: userId,
-                },
-            },
-            schedule: {
-                connect: {
-                    id: scheduleId,
-                },
-            },
-            confirmed: confirmed,
-        },
-    });
-}
-
-async function findOrCreateSchedule(date: Date, ownerId: string, cost: number = 0) {
-    const existingSchedule = await prisma.schedule.findFirst({
+async function findOrCreateMeeting(date: Date, ownerId: string, cost: number = 0) {
+    const existingMeeting = await prisma.meeting.findFirst({
         where: {
             AND: [
                 { date: { equals: date } },
@@ -44,11 +14,11 @@ async function findOrCreateSchedule(date: Date, ownerId: string, cost: number = 
         },
     });
 
-    if (existingSchedule) {
-        return existingSchedule;
+    if (existingMeeting) {
+        return existingMeeting;
     }
 
-    return prisma.schedule.create({
+    return prisma.meeting.create({
         data: {
             date,
             owner: {
@@ -59,6 +29,31 @@ async function findOrCreateSchedule(date: Date, ownerId: string, cost: number = 
             cost: cost
         },
     });
+}
+
+async function findOrCreateMeetingConfirmation(meetingId: string, userId: string, confirm: boolean) {
+    const existingMeetingConfirmation = await prisma.meetingConfirmation.findUnique({
+        where: {
+            meetingId_userId: {  // Compound unique key
+                meetingId: meetingId,
+                userId: userId,
+            },
+        },
+    });
+
+    if (existingMeetingConfirmation) {
+        return existingMeetingConfirmation;
+    }
+
+    // Now insert the confirmation
+    return await prisma.meetingConfirmation.create({
+        data: {
+            meetingId: meetingId,
+            userId: userId,
+            isConfirmed: confirm,
+        },
+    });
+
 }
 
 async function main() {
@@ -86,23 +81,23 @@ async function main() {
         },
     });
 
-    // Seed Schedules
-    const schedule1 = await findOrCreateSchedule(new Date('2022-12-01T08:00:00Z'), user2.id, 10);
-    const schedule2 = await findOrCreateSchedule(new Date('2022-12-02T10:00:00Z'), user2.id);
-    const schedule3 = await findOrCreateSchedule(new Date('2022-12-03T10:00:00Z'), user2.id, 2);
-    const schedule4 = await findOrCreateSchedule(new Date('2022-12-03T11:00:00Z'), user2.id);
-    const schedule5 = await findOrCreateSchedule(new Date('2022-12-02T11:00:00Z'), user1.id);
-    const schedule6 = await findOrCreateSchedule(new Date('2022-12-03T11:00:00Z'), user1.id, 2);
+    // Seed Meetings
+    const meeting1 = await findOrCreateMeeting(new Date('2022-12-01T08:00:00Z'), user2.id, 10);
+    const meeting2 = await findOrCreateMeeting(new Date('2022-12-02T10:00:00Z'), user2.id);
+    const meeting3 = await findOrCreateMeeting(new Date('2022-12-03T10:00:00Z'), user2.id, 2);
+    const meeting4 = await findOrCreateMeeting(new Date('2022-12-03T11:00:00Z'), user2.id);
+    const meeting5 = await findOrCreateMeeting(new Date('2022-12-02T11:00:00Z'), user1.id);
+    const meeting6 = await findOrCreateMeeting(new Date('2022-12-03T11:00:00Z'), user1.id, 2);
 
-    // Seed Appointments
+    // Seed Meetings
 
-    // Appointments John took with Jane
-    const appointment1 = await findOrCreateAppointment(user1.id, schedule1.id, true);
-    const appointment2 = await findOrCreateAppointment(user1.id, schedule2.id, false);
+    // Meetings John took with Jane
+    const meetingConfirmation1 = await findOrCreateMeetingConfirmation(meeting1.id, user1.id, true);
+    const meetingConfirmation2 = await findOrCreateMeetingConfirmation(meeting2.id, user1.id, false);
 
-    // Appointments Jane took with John
-    const appointment3 = await findOrCreateAppointment(user2.id, schedule5.id, true);
-    const appointment4 = await findOrCreateAppointment(user2.id, schedule6.id, false);
+    // Meetings Jane took with John
+    const meetingConfirmation3 = await findOrCreateMeetingConfirmation(meeting5.id, user2.id, true);
+    const meetingConfirmation4 = await findOrCreateMeetingConfirmation(meeting6.id, user2.id, false);
 
     console.log('Seed data inserted successfully');
 }

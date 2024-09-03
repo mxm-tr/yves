@@ -1,29 +1,37 @@
 'use client'
 import { Box, Button, CircularProgress, Container, Grid, Typography, Accordion, AccordionSummary, AccordionDetails, Paper } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'; // Icon for Accordion
-import AppointmentCard from './components/appointmentCard';
+import MeetingConfirmationCard from './components/meetingConfirmationCard';
 import { useEffect, useState } from 'react';
-import { AppointmentWithSchedule } from './lib/models'
 
 import { useRouter } from 'next/navigation'
 import { useSession } from "next-auth/react"
+
+import Sidebar from './components/sidebar';
 import SignIn from './components/signIn';
 
 export default function Home() {
 
-  const initAppointments: AppointmentWithSchedule[] = [];
-  const [appointments, setAppointments] = useState(initAppointments);
   const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
 
   }, [])
 
-  // Filter appointments based on confirmation status
+  // Filter meetings based on confirmation status
 
   return (
     <Box>
-
+      <Grid
+        container
+        direction="row"
+        justifyContent="space-between"
+        alignItems="flex-start"
+      >
+        <Grid item xs>
+          <Sidebar />
+        </Grid>
+      </Grid>
       <Grid container
         justifyContent="center"
         alignItems="center"
@@ -61,16 +69,16 @@ export function WelcomePage() {
               Welcome to Yves
             </Typography>
             <Typography variant="h6" component="p" gutterBottom>
-              Manage your appointments with ease, stay on top of your schedule, and let Yves take care of the rest.
+              Manage your meetings with ease, stay on top of your schedule, and let Yves take care of the rest.
             </Typography>
             <Box sx={{ mt: 4 }}>
               {session.status === 'authenticated' ?
                 <Box>
                   <Button variant="contained" color="primary" size="large" sx={{ mr: 2 }} onClick={() => router.push('/planning')}>
-                    My appointments
+                    My meetings
                   </Button>
                   <Button variant="contained" color="secondary" size="large" sx={{ mr: 2 }} onClick={() => router.push('/book')}>
-                    Book an appointment
+                    Book a meeting
                   </Button>
                 </Box>
                 :
@@ -84,7 +92,7 @@ export function WelcomePage() {
           <Box
             component="img"
             src="/logo.svg" // Replace with your image path
-            alt="Yves Appointment Illustration"
+            alt="Yves Meeting Illustration"
             sx={{ width: '100%', maxWidth: '500px', mx: 'auto' }}
           />
         </Grid>

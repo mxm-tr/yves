@@ -67,7 +67,7 @@ export default function Sidebar() {
                     </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
-                    <ListItemButton component={Link} href="/appointments-with-me">
+                    <ListItemButton component={Link} href="/meetings-with-me">
                         <ListItemIcon><EditIcon /></ListItemIcon>
                         <ListItemText primary="Manage my slots" />
                     </ListItemButton>

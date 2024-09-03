@@ -64,7 +64,7 @@ model Authenticator {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String    @id @default(cuid()) @map("user_id")
   name          String
   email         String    @unique
   emailVerified DateTime?
@@ -73,51 +73,48 @@ model User {
   createdAt     DateTime  @default(now()) @map(name: "created_at")
   updatedAt     DateTime  @updatedAt @map(name: "updated_at")
 
-  bookedAppointments    Appointment[]
-  bookedAppointmentsIds String[]
-  schedules             Schedule[]
-  followers             FollowingLinks[] @relation("Followers")
-  followed              FollowingLinks[] @relation("Followed")
+  followers FollowingLinks[] @relation("Followers")
+  followed  FollowingLinks[] @relation("Followed")
 
   accounts       Account[]
   sessions       Session[]
   Authenticators Authenticator[]
 
+  ownedMeetings        Meeting[]
+  meetingConfirmations MeetingConfirmation[]
+
   @@map(name: "users")
 }
 
-model Schedule {
-  id           String        @id @default(cuid())
-  date         DateTime
-  owner        User          @relation(fields: [ownerId], references: [id])
-  ownerId      String
-  appointments Appointment[]
-  cost         Int           @default(0)
+model Meeting {
+  id      String   @id @default(cuid())
+  date    DateTime
+  owner   User     @relation(fields: [ownerId], references: [id])
+  ownerId String   @map("user_id")
 
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @updatedAt @map(name: "updated_at")
+  cost   Int    @default(0)
 
-  @@map(name: "schedules")
+  numberOfGuests Int @default(1)
+
+  createdAt            DateTime              @default(now()) @map(name: "created_at")
+  updatedAt            DateTime              @updatedAt @map(name: "updated_at")
+  meetingConfirmations MeetingConfirmation[]
+
+  @@map(name: "meeting")
 }
 
-model Appointment {
-  id String @id @default(cuid())
+model MeetingConfirmation {
+  id        String  @id @default(cuid())
+  meeting   Meeting @relation(fields: [meetingId], references: [id])
+  meetingId String
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String
 
-  // Who made the appointment
-  user   User   @relation(fields: [userId], references: [id])
-  userId String
+  // Indicates if the guest has confirmed their attendance
+  isConfirmed Boolean @default(false)
 
-  // On what schedule
-  schedule   Schedule @relation(fields: [scheduleId], references: [id])
-  scheduleId String
-
-  // Has it been confirmed by the owner of the schedule
-  confirmed Boolean
-
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @updatedAt @map(name: "updated_at")
-
-  @@map(name: "appointments")
+  @@unique([meetingId, userId]) // Ensures a user can only confirm once per meeting
+  @@map("meeting_confirmation")
 }
 
 model FollowingLinks {

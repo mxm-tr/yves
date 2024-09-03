@@ -11,22 +11,20 @@ import {
     Grid
 } from '@mui/material';
 
-import { Schedule, User } from 'prisma/prisma-client'
+import { Meeting, User } from 'prisma/prisma-client'
 import { useSession } from "next-auth/react"
-import UserCard from '../components/userCard';
-import SignIn from '../components/signIn';
 
-export default function ScheduleForm() {
+export default function MeetingForm() {
     const router = useRouter();
 
-    const emptySchedules: Map<string, Schedule[]> = new Map();
-    const [availableSchedules, setAvailableSchedules] = useState(emptySchedules)
+    const emptyMeetings: Map<string, Meeting[]> = new Map();
+    const [availableMeetings, setAvailableMeetings] = useState(emptyMeetings)
 
     const [relatedUsers, setRelatedUsers] = useState<User[]>()
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const [scheduleOwner, setScheduleOwner] = useState<User>();
+    const [scheduleOwner, setMeetingOwner] = useState<User>();
 
     // Locale for date and time format
     let defaultLocale = (typeof navigator !== 'undefined' && navigator.language) || 'en-US';
@@ -43,7 +41,7 @@ export default function ScheduleForm() {
             fetch(`/api/v1/schedules/${scheduleOwner.id}`)
                 .then((res) => res.json())
                 .then((data) => {
-                    setAvailableSchedules(new Map(Object.entries(data)));
+                    setAvailableMeetings(new Map(Object.entries(data)));
                 })
         }
         setIsLoading(false);
@@ -53,10 +51,10 @@ export default function ScheduleForm() {
     // State to track selected day and time
     const [selectedDay, setSelectedDay] = useState("");
     const [selectedTime, setSelectedTime] = useState("");
-    const [selectedScheduleId, setSelectedScheduleId] = useState(""); // State to store the selected scheduleId
+    const [selectedMeetingId, setSelectedMeetingId] = useState(""); // State to store the selected scheduleId
 
     const handleSelectUser = (user: User) => {
-        setScheduleOwner(user);
+        setMeetingOwner(user);
     };
 
     const handleDaySelect = (day: string) => {
@@ -66,7 +64,7 @@ export default function ScheduleForm() {
 
     const handleTimeSelect = (time: string, scheduleId: string) => {
         setSelectedTime(time);
-        setSelectedScheduleId(scheduleId);
+        setSelectedMeetingId(scheduleId);
     };
 
     // State for the success modal
@@ -80,13 +78,13 @@ export default function ScheduleForm() {
     };
 
 
-    const handleScheduleAppointment = async () => {
+    const handleMeetingMeeting = async () => {
         try {
             // Show loading state
             setIsLoading(true);
 
             // Send a POST request to the backend API
-            const response = await fetch(`/api/v1/appointments/schedule/${selectedScheduleId}`, { method: 'POST' });
+            const response = await fetch(`/api/v1/meetings/schedule/${selectedMeetingId}`, { method: 'POST' });
 
             if (response.ok) {
 
@@ -98,12 +96,12 @@ export default function ScheduleForm() {
 
             } else {
                 // Handle non-successful response (e.g., display an error message)
-                console.error('Error scheduling appointment. Status:', response.status);
-                setError('Error scheduling appointment: ' + await response.text());
+                console.error('Error scheduling meeting. Status:', response.status);
+                setError('Error scheduling meeting: ' + await response.text());
             }
         } catch (error) {
-            console.error('Error scheduling appointment', error);
-            setError('Error scheduling appointment. Please try again later.');
+            console.error('Error scheduling meeting', error);
+            setError('Error scheduling meeting. Please try again later.');
         } finally {
             // Hide loading state
             setIsLoading(false);
@@ -130,12 +128,9 @@ export default function ScheduleForm() {
 
     return (
         <Box>
-
             <Grid
                 container
                 direction="row"
-                justifyContent="space-between"
-                alignItems="flex-start"
             >
                 <Grid item xs>
                     <Sidebar />
@@ -145,9 +140,10 @@ export default function ScheduleForm() {
 
             <Grid container
                 justifyContent="center"
-                alignItems="center"
+                alignItems="flex"
                 rowSpacing={3}
-                columnSpacing={2}>
+                columnSpacing={2}
+                xs={12}>
 
                 <Grid item xs={12} textAlign="center">
                     {/* Loading Spinner */}
@@ -155,7 +151,7 @@ export default function ScheduleForm() {
                 </Grid>
 
                 {/* List of acquaintances */}
-                <Grid item xs={4} textAlign="center">
+                <Grid item xs={12} textAlign="center">
                     {!scheduleOwner &&
                         <Box>
                             {!isLoading && relatedUsers && relatedUsers.length > 0 ?
@@ -191,74 +187,85 @@ export default function ScheduleForm() {
                                     session.status === 'authenticated' ?
                                         <Typography variant="h6">Oh no you don&apos;t know anyone yet!</Typography>
                                         :
-                                        <Typography variant="h6">Sign in to book an appointment!</Typography>
+                                        <Typography variant="h6">Sign in to book a meeting!</Typography>
                                 )
                             }
                         </Box>
                     }
 
 
-                    {/* Available Schedules */}
+                    {/* Available Meetings */}
                     {scheduleOwner ?
-                        <section>
-                            <Typography variant="h2">When do you want to meet&nbsp;&nbsp;
-                                <b><Chip label={scheduleOwner.name} onDelete={() => setScheduleOwner(undefined)} /></b>
-                                &nbsp;&nbsp;?
-                            </Typography>
-                            {!isLoading && Array.from(availableSchedules).length > 0 ?
-                                <List>
-                                    {Array.from(availableSchedules).map(([day, dates]) => (
-                                        <ListItem key={day}>
+                        <Grid container xs={12} textAlign="center" rowSpacing={2}>
+                            <Grid item xs={12} textAlign="center">
+                                <Typography variant="h3">When do you want to meet&nbsp;&nbsp;
+                                    <b><Chip label={scheduleOwner.name} onDelete={() => setMeetingOwner(undefined)} /></b>
+                                    &nbsp;&nbsp;?
+                                </Typography>
+                            </Grid>
+                            {!isLoading && Array.from(availableMeetings).length > 0 ?
+                                <Grid container item xs={12}
+                                    textAlign="center"
+                                    justifyContent="center"
+                                    alignItems="center"
+                                    rowSpacing={3}
+                                    columnSpacing={2}
+                                >
+                                    {Array.from(availableMeetings).map(([day, dates]) => (
+                                        <Grid item xs={6} sm={4} key={day}>
                                             <Button
                                                 onClick={() => handleDaySelect(day)}
                                                 variant={selectedDay === day ? "contained" : "outlined"}
                                             >
                                                 {new Date(day).toLocaleDateString(defaultLocale)}
                                             </Button>
-                                            <List>
-                                                {dates.map(date => (
-                                                    <ListItem key={date.id}>
-                                                        <Button
-                                                            onClick={() => handleTimeSelect(date.date.toString(), date.id)}
-                                                            disabled={selectedDay !== day} // Disable times for other days
-                                                            variant={selectedTime === date.date.toString() ? "contained" : "outlined"}
-                                                        >
-                                                            {new Date(date.date).toLocaleTimeString(defaultLocale, { hour: '2-digit', minute: '2-digit' })}
-                                                        </Button>
-                                                        <Chip
-                                                            label={`Cost: ${date.cost}`}
-                                                            color="primary"
-                                                            size="small"
-                                                            style={{ marginLeft: '0.5rem' }}
-                                                        />
-                                                    </ListItem>
-                                                ))}
-                                            </List>
-                                            <Divider />
-                                        </ListItem>
+                                            <Grid item xs={10} key={day}>
+                                                <List>
+                                                    {dates.map(date => (
+                                                        <ListItem key={date.id}>
+                                                            <Button
+                                                                onClick={() => handleTimeSelect(date.date.toString(), date.id)}
+                                                                disabled={selectedDay !== day} // Disable times for other days
+                                                                variant={selectedTime === date.date.toString() ? "contained" : "outlined"}
+                                                            >
+                                                                {new Date(date.date).toLocaleTimeString(defaultLocale, { hour: '2-digit', minute: '2-digit' })}
+                                                            </Button>
+                                                            <Chip
+                                                                label={`Cost: ${date.cost}`}
+                                                                color="primary"
+                                                                size="small"
+                                                                style={{ marginLeft: '0.5rem' }}
+                                                            />
+                                                        </ListItem>
+                                                    ))}
+                                                </List>
+                                            </Grid>
+                                        </Grid>
                                     ))}
-                                </List>
+                                </Grid>
                                 : <Typography variant="h6">No more schedule available for {scheduleOwner.name}</Typography>}
-                        </section>
+                        </Grid>
                         : ""}
 
-                    {/* Button to Schedule Appointment */}
+                    {/* Button to Meeting Meeting */}
                     <Button
                         variant="contained"
                         color="primary"
-                        onClick={handleScheduleAppointment}
+                        onClick={handleMeetingMeeting}
                         disabled={!selectedDay || !selectedTime}
                         aria-disabled={isLoading}
                     >
-                        Schedule Appointment
+                        Schedule Meeting
                     </Button>
                 </Grid>
 
                 <Dialog open={successModalOpen} onClose={handleSuccessModalClose}>
-                    <DialogTitle>Appointment Scheduled Successfully</DialogTitle>
+                    <DialogTitle>Meeting scheduled successfully!</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Your appointment with {scheduleOwner?.name} has been scheduled successfully.
+                            Your meeting with {scheduleOwner?.name} has been scheduled successfully.
+                            <br />
+                            Now wait for the confirmation!
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>

@@ -1,5 +1,5 @@
 import { auth } from "@/app/auth"
-import { getSchedulesGroupedByUserDay } from '@/app/lib/meetings';
+import { getCurrentUserMeetingsGroupedByDay } from '@/app/lib/meetings';
 import { NextResponse } from "next/server"
 
 export async function GET(
@@ -14,7 +14,7 @@ export async function GET(
 
   if (session && session.user?.id) {
     // Get a user's available schedules
-    const users = await getSchedulesGroupedByUserDay(session.user?.id, params.userId);
+    const users = await getCurrentUserMeetingsGroupedByDay(session.user?.id);
     return Response.json(users)
   }
 }

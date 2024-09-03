@@ -17,10 +17,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useSession } from "next-auth/react";
 import SignIn from '../components/signIn';
 import UserCard from '../components/userCard';
-import AppointmentCard from '../components/appointmentCard';
+import MeetingConfirmationCard from '../components/meetingConfirmationCard';
 import Sidebar from '../components/sidebar';
 import Timeline from '../components/Timeline';
-import { AppointmentWithScheduleAndUser } from '../lib/models';
+import { MeetingConfirmationsWithMeetingAndOwner } from '../lib/models';
 
 // Helper function to format the date
 function formatDate(date: Date, locale: string): string {
@@ -28,34 +28,31 @@ function formatDate(date: Date, locale: string): string {
     return newDate.toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric' });
 };
 
-interface GroupedAppointments {
-    groups: Map<string, Array<AppointmentWithScheduleAndUser>>;
+interface GroupedMeetingConfirmations {
+    groups: Map<string, Array<MeetingConfirmationsWithMeetingAndOwner>>;
     dates: Array<string>;
 }
 
-// Helper function to group appointments by date and generate a list of all dates in range
-function groupAppointmentsByDate(
-    appointments: Array<AppointmentWithScheduleAndUser>, 
+// Helper function to group meetings by date and generate a list of all dates in range
+function groupMeetingsByDate(
+    meetings: Array<MeetingConfirmationsWithMeetingAndOwner>,
     locale: string
-): GroupedAppointments {
-    const groups: Map<string, Array<AppointmentWithScheduleAndUser>> = new Map();
+): GroupedMeetingConfirmations {
+    const groups: Map<string, Array<MeetingConfirmationsWithMeetingAndOwner>> = new Map();
     const dates = new Set<string>();
 
-    appointments.forEach((appointment) => {
-        const formattedDate = formatDate(appointment.schedule.date, locale);
+    meetings.forEach((meetingConfirmation) => {
+        const formattedDate = formatDate(meetingConfirmation.meeting.date, locale);
+
         dates.add(formattedDate);
 
         if (groups.get(formattedDate)) {
-            groups.get(formattedDate)?.push(appointment);
+            groups.get(formattedDate)?.push(meetingConfirmation);
         }
         else {
-            groups.set(formattedDate, []);
+            groups.set(formattedDate, [meetingConfirmation]);
         }
     });
-
-    console.log(appointments);
-    console.log(groups);
-    console.log(Array.from(dates));
 
     return { groups, dates: Array.from(dates) };
 };
@@ -63,7 +60,7 @@ function groupAppointmentsByDate(
 // Main component
 export default function Planning() {
     const session = useSession();
-    const [appointments, setAppointments] = useState<Array<AppointmentWithScheduleAndUser>>([]);
+    const [meetings, setMeetings] = useState<Array<MeetingConfirmationsWithMeetingAndOwner>>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [expandedDate, setExpandedDate] = useState<string | null>(null); // State to track expanded Accordion
@@ -71,37 +68,49 @@ export default function Planning() {
 
     useEffect(() => {
         setIsLoading(true);
-        fetch('/api/v1/appointments')
+        fetch('/api/v1/meetings')
             .then((res) => res.json())
             .then((data) => {
-                Array.isArray(data) ? setAppointments(data) : setAppointments([]);
+                Array.isArray(data) ? setMeetings(data) : setMeetings([]);
                 setIsLoading(false);
             })
             .catch(err => {
-                setError('Failed to load appointments.');
+                setError('Failed to load meetings.');
                 setIsLoading(false);
             });
     }, []);
 
     // Group and prepare dates
-    const { groups: groupedAppointments, dates } = groupAppointmentsByDate(appointments, defaultLocale);
+    const { groups: groupedMeetingConfirmations, dates } = groupMeetingsByDate(meetings, defaultLocale);
 
     // Create timeline events
-    const timelineEvents = dates.map(date => ({
-        date,
-        content: groupedAppointments.get(date) && groupedAppointments.get(date)!.length > 0
-            ? `${groupedAppointments.get(date)!.length} appointment(s)`
-            : 'No appointments',
-        onClick: () => setExpandedDate(date) // Set the expanded date on click
-    }));
+    function timelineEvents() {
+        return dates.map(date => ({
+            date,
+            content: groupedMeetingConfirmations.get(date) && groupedMeetingConfirmations.get(date)!.length > 0
+                ? `${groupedMeetingConfirmations.get(date)!.length} meeting(s)`
+                : 'No meetings',
+            onClick: () => setExpandedDate(date) // Set the expanded date on click
+        }));
+    }
 
-    const handleDelete = () => {
+    const handleCancel = () => {
         // Trigger a reload by setting a dummy state
-        setAppointments([...appointments]);
+        setMeetings([...meetings]);
     };
 
     return (
-        <Box sx={{ display: 'flex' }}>
+        <Box>
+            <Grid
+                container
+                direction="row"
+                justifyContent="space-between"
+                alignItems="flex-start"
+            >
+                <Grid item xs>
+                    <Sidebar />
+                </Grid>
+            </Grid>
             <Grid
                 container
                 direction="row"
@@ -109,13 +118,9 @@ export default function Planning() {
                 alignItems="flex-start"
                 sx={{ flexGrow: 1 }}
             >
-                <Grid item xs={2} sx={{ display: { xs: 'none', md: 'block' } }}>
-                    <Sidebar />
-                </Grid>
-
                 <Grid item xs={12} md={8}>
                     <Box p={2}>
-                        {/* Appointments Section */}
+                        {/* Meetings Section */}
                         <Box mb={2} textAlign="center">
                             <Typography variant="h2">Planning</Typography>
                         </Box>
@@ -126,7 +131,7 @@ export default function Planning() {
                             {error && <Typography variant="h6" color="error">{error}</Typography>}
                         </Box>
 
-                        {/* Display Appointments by Date */}
+                        {/* Display Meetings by Date */}
                         <Grid container spacing={2}>
                             {dates.map(date => (
                                 <Grid item xs={12} key={date}>
@@ -141,20 +146,20 @@ export default function Planning() {
                                                 </Box>
                                             </AccordionSummary>
                                             <AccordionDetails>
-                                                {groupedAppointments.get(date) && groupedAppointments.get(date)!.length > 0 ? (
+                                                {groupedMeetingConfirmations.get(date) && groupedMeetingConfirmations.get(date)!.length > 0 ? (
                                                     <Grid container spacing={2}>
-                                                        {groupedAppointments.get(date)?.map(appointment => (
-                                                            <Grid item xs={12} sm={6} md={5} lg={4} key={appointment.id}>
-                                                                <AppointmentCard
-                                                                    appointment={appointment}
-                                                                    onDelete={handleDelete} // Pass the handleDelete function
+                                                        {groupedMeetingConfirmations.get(date)?.map(meetingConfirmation => (
+                                                            <Grid item xs={12} sm={6} md={5} lg={4} key={meetingConfirmation.id}>
+                                                                <MeetingConfirmationCard
+                                                                    meetingConfirmation={meetingConfirmation}
+                                                                    onCancel={handleCancel} // Pass the handleCancel function
                                                                 />
                                                             </Grid>
                                                         ))}
                                                     </Grid>
                                                 ) : (
                                                     <Typography variant="body1" color="textSecondary" textAlign="center">
-                                                        No appointments scheduled for this day.
+                                                        No meetings scheduled for this day.
                                                     </Typography>
                                                 )}
                                             </AccordionDetails>
@@ -167,7 +172,7 @@ export default function Planning() {
                 </Grid>
 
                 <Grid item xs={2} sx={{ display: { xs: 'none', md: 'block' } }}>
-                    <Timeline events={timelineEvents} onTimelineItemClick={(date) => setExpandedDate(date)} />
+                    <Timeline events={timelineEvents()} onTimelineItemClick={(date) => setExpandedDate(date)} />
                 </Grid>
             </Grid>
         </Box>

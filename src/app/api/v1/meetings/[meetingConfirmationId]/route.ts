@@ -1,10 +1,10 @@
 import { auth } from "@/app/auth"
-import { cancelAppointment } from '@/app/lib/appointments';
+import { deleteMeeting } from '@/app/lib/meetings';
 import { NextRequest, NextResponse } from "next/server"
 
-export async function POST(
+export async function DELETE(
   request: Request,
-  { params }: { params: { appointmentId: string } }
+  { params }: { params: { meetingId: string } }
 ) {
 
   const session = await auth();
@@ -13,9 +13,9 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  await cancelAppointment(session.user.id, params.appointmentId);
+  await deleteMeeting(session.user.id, params.meetingId);
 
-  return new Response('Appointment cancelled', {
+  return new Response('Meeting cancelled', {
     status: 200,
   })
 }

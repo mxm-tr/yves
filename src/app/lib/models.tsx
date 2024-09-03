@@ -1,15 +1,19 @@
-import { PrismaClient, Appointment, Schedule, User } from '@prisma/client';
+import { Meeting, User, MeetingConfirmation } from '@prisma/client';
 
-export interface AppointmentWithSchedule extends Appointment {
-    schedule: ScheduleWithOwner
-}
-
-export interface AppointmentWithScheduleAndUser extends AppointmentWithSchedule {
-    user: User
-}
-
-export interface ScheduleWithOwner extends Schedule {
+export interface MeetingWithOwner extends Meeting {
     owner: User
+}
+
+export interface MeetingConfirmationsWithMeetingAndOwner extends MeetingConfirmation {
+    meeting: MeetingWithOwner
+}
+
+export interface MeetingsWithMeetingConfirmationsAndGuests extends Meeting {
+    meetingConfirmations: MeetingConfirmationWithGuests[]
+}
+
+export interface MeetingConfirmationWithGuests extends MeetingConfirmation {
+    user: User
 }
 
 // Custom error classes

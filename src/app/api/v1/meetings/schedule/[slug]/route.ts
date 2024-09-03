@@ -1,7 +1,7 @@
 import { auth } from "@/app/auth"
 import { NextRequest, NextResponse } from "next/server"
 
-import { scheduleAppointment } from '@/app/lib/appointments';
+import { bookMeeting } from '@/app/lib/meetings';
 import { InsufficientCoinsError } from '@/app/lib/models';
 
 export async function POST(
@@ -19,10 +19,10 @@ export async function POST(
         // Get scheduleId from params
         const scheduleId = params.slug;
 
-        // Call the scheduleAppointment function to get the appointmentId
-        const appointmentId = await scheduleAppointment(session.user.id, scheduleId);
-        // Return a successful response with the appointmentId value in the string
-        return new Response(`Appointment ${appointmentId} booked`, {
+        // Call the scheduleMeeting function to get the meetingId
+        const meetingId = await bookMeeting(session.user.id, scheduleId);
+        // Return a successful response with the meetingId value in the string
+        return new Response(`Meeting ${meetingId} booked`, {
             status: 200,
         });
 

@@ -9,7 +9,7 @@ services:
       - sh
       - -c
     command:
-      - ./node_modules/.bin/prisma migrate dev && npm run dev
+      - ./node_modules/.bin/prisma generate && npm run dev
     env_file:
       - .env.local
     ports:
@@ -25,12 +25,9 @@ services:
       context: .
       target: db
     environment:
-      POSTGRES_HOST_AUTH_METHOD: password
-      POSTGRES_INITDB_ARGS: --auth-host=password
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?error}
-      YVES_DB_PASSWORD: ${YVES_DB_PASSWORD:?error}
-      DEX_DB_PASSWORD: ${DEX_DB_PASSWORD:?error}
+      POSTGRES_DB: yves
+      POSTGRES_USER: yves
+      POSTGRES_PASSWORD: ${YVES_DB_PASSWORD:?error}
     ports:
       - "5432:5432"
     volumes:
@@ -50,12 +47,9 @@ services:
   postgres-prod:
     image: ghcr.io/mxm-tr/yves:master-db
     environment:
-      POSTGRES_HOST_AUTH_METHOD: password
-      POSTGRES_INITDB_ARGS: --auth-host=password
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?error}
-      YVES_DB_PASSWORD: ${YVES_DB_PASSWORD:?error}
-      DEX_DB_PASSWORD: ${DEX_DB_PASSWORD:?error}
+      POSTGRES_DB: yves
+      POSTGRES_USER: yves
+      POSTGRES_PASSWORD: ${YVES_DB_PASSWORD:?error}
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
     profiles: ["prod"]

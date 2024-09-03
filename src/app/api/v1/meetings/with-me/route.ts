@@ -1,12 +1,12 @@
 import { auth } from "@/app/auth"
-import { getAppointmentsTakenWithMe } from '@/app/lib/appointments';
+import { getMeetingsTakenWithMe } from '@/app/lib/meetings';
 import { NextResponse } from "next/server"
 
 export const GET = auth(async function GET(req) {
   if (req.auth && req.auth.user?.id) {
     // Get current user
-    const appointments = await getAppointmentsTakenWithMe(req.auth.user?.id);
-    return Response.json(appointments)
+    const meetings = await getMeetingsTakenWithMe(req.auth.user?.id);
+    return Response.json(meetings)
   }
   return NextResponse.json({ message: "Not authenticated" }, { status: 401 })
 })
