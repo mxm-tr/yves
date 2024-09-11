@@ -4,8 +4,9 @@ export interface MeetingWithOwner extends Meeting {
     owner: User
 }
 
-export interface MeetingConfirmationsWithMeetingAndOwner extends MeetingConfirmation {
+export interface MeetingConfirmationsWithMeetingAndOwnerAndGuests extends MeetingConfirmation {
     meeting: MeetingWithOwner
+    user: User
 }
 
 export interface MeetingsWithMeetingConfirmationsAndGuests extends Meeting {

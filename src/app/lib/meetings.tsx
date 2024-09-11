@@ -89,7 +89,8 @@ export async function getMeetings(userId: string) {
         include: {
             user: {
                 select: {
-                    id: true
+                    id: true,
+                    name: true
                 }
             },
             meeting: {
@@ -103,9 +104,12 @@ export async function getMeetings(userId: string) {
                 }
             }
         },
-        // Select meetings where this user has been invited
+        // Select meetings this user created, or the ones the user booked
         where: {
-            userId: { equals: currentUser?.id }
+            OR: [
+                { meeting: { ownerId: currentUser?.id } },
+                { userId: { equals: currentUser?.id } }
+            ]
         }
     });
 }

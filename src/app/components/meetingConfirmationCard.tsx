@@ -5,9 +5,9 @@ import Alert from '@mui/material/Alert';
 import CheckIcon from '@mui/icons-material/Check';
 
 import { Meeting, User, MeetingConfirmation } from '@prisma/client';
-import { MeetingConfirmationsWithMeetingAndOwner } from '../lib/models';
+import { MeetingConfirmationsWithMeetingAndOwnerAndGuests } from '../lib/models';
 
-const MeetingConfirmationCard: React.FC<{ meetingConfirmation: MeetingConfirmationsWithMeetingAndOwner, onCancel: () => void }> = ({ meetingConfirmation, onCancel }) => {
+const MeetingConfirmationCard: React.FC<{ meetingConfirmation: MeetingConfirmationsWithMeetingAndOwnerAndGuests, onCancel: () => void }> = ({ meetingConfirmation, onCancel }) => {
 
     const [cancelConfirmationOpen, setCancelConfirmationOpen] = useState(false);
     const [isCanceld, setIsCanceld] = useState(false);
@@ -74,26 +74,20 @@ const MeetingConfirmationCard: React.FC<{ meetingConfirmation: MeetingConfirmati
                             <Grid item>
                                 <Typography variant="h6">
                                     {meetingConfirmation.isConfirmed ? "✅ Confirmed" : "Pending confirmation ⌛"}
+                                    &nbsp;(🪙&nbsp;{meetingConfirmation.meeting.cost})
                                 </Typography>
                             </Grid>
                             <Grid item>
                                 <Typography variant="h6">
-                                    🐸 With: {meetingConfirmation.meeting.owner.name}
+                                    ⏰ {new Date(meetingConfirmation.meeting.date).toLocaleTimeString(defaultLocale, { hour: '2-digit', minute: '2-digit' })}
+                                    &nbsp;({meetingConfirmation.meeting.durationMinutes} mn)
                                 </Typography>
                             </Grid>
                             <Grid item>
-                                <Typography variant="h6">
-                                    📅 Date: {new Date(meetingConfirmation.meeting.date).toLocaleDateString(defaultLocale)}
-                                </Typography>
-                            </Grid>
-                            <Grid item>
-                                <Typography variant="h6">
-                                    ⌚ Time: {new Date(meetingConfirmation.meeting.date).toLocaleTimeString(defaultLocale, { hour: '2-digit', minute: '2-digit' })}
-                                </Typography>
-                            </Grid>
-                            <Grid item>
-                                <Typography variant="h6">
-                                    💰 Cost: {meetingConfirmation.meeting.cost} 🪙
+                                <Typography textAlign={'center'}>
+                                    ✨ {meetingConfirmation.meeting.owner.name} ✨
+                                    <br />&<br />
+                                    ✨ {meetingConfirmation.user.name} ✨
                                 </Typography>
                             </Grid>
                             <Grid item>

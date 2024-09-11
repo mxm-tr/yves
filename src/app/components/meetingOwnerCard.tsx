@@ -2,11 +2,10 @@
 
 import React, { useState } from 'react';
 import {
-    Button, Card, CardContent, Fade, Grid, Typography, Dialog, DialogTitle, DialogContent,
-    List, ListItem,
-    DialogActions, CircularProgress,
-    Box
+    Accordion, AccordionActions, AccordionSummary, Button, Card, CardContent, Fade, Grid, Typography, Dialog, DialogTitle, DialogContent,
+    DialogActions, CircularProgress, Paper
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Alert from '@mui/material/Alert';
 import CheckIcon from '@mui/icons-material/Check';
 
@@ -186,65 +185,54 @@ const MeetingOwnerCard: React.FC<{ meeting: MeetingsWithMeetingConfirmationsAndG
     };
 
     return (
-        <Box>
-            <Card key={meeting.id} style={{ marginBottom: 16 }}>
-                <CardContent>
-                    <Grid container direction="column" alignItems="center" spacing={2}>
-                        <Grid item>
-                            <Typography variant="h6">
-                                📅 Date: {new Date(meeting.date).toLocaleDateString(defaultLocale)}
-                            </Typography>
-                        </Grid>
-                        <Grid item>
-                            <Typography variant="h6">
-                                ⌚ Time: {new Date(meeting.date).toLocaleTimeString(defaultLocale, { hour: '2-digit', minute: '2-digit' })}
-                            </Typography>
-                        </Grid>
-                        <Grid item>
-                            <Typography variant="h6">
-                                💰 Cost: {meeting.cost} 🪙
-                            </Typography>
-                        </Grid>
-                        <Grid item>
-                            <Typography variant="h6">
-                                🐸 Attendees: {meeting.meetingConfirmations.length} / {meeting.numberOfGuests}
-                            </Typography>
-                        </Grid>
-                        <Grid item>
-                            {
-                                meeting.meetingConfirmations.length < 1 ?
-                                    <Grid item>
-                                        <Typography variant="h6">No one booked yet :(</Typography>
-                                    </Grid>
-                                    : meeting.meetingConfirmations.map((confirmation) => (
+        <Paper elevation={2}>
+            <Grid container direction="column" alignItems="center" spacing={2} xs={12}>
+                <Grid item xs={12}>
+                    <Typography variant="h6">
+                        📅&nbsp;{new Date(meeting.date).toLocaleDateString(defaultLocale)}
+                    </Typography>
+                    <Typography variant="h6">
+                        ⌚&nbsp;{new Date(meeting.date).toLocaleTimeString(defaultLocale, { hour: '2-digit', minute: '2-digit' })}
+                        &nbsp;({meeting.durationMinutes} mn)
+                    </Typography>
+                    <Typography variant="h6">
+                        🪙&nbsp;{meeting.cost}
+                    </Typography>
+                    <Accordion defaultExpanded={meeting.meetingConfirmations.length > 0 ? true : false}>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            👥 Guests {meeting.meetingConfirmations.length} / {meeting.numberOfGuests}
+                        </AccordionSummary>
+                        {
+                            meeting.meetingConfirmations.length < 1 ?
+                                <Typography>No one booked yet 😢</Typography>
+                                : meeting.meetingConfirmations.map(
+                                    (confirmation) => (
                                         <Grid item key={confirmation.id}>
-                                            <Grid item>
-                                                <Typography variant="h6">{confirmation.isConfirmed ? "✅ Confirmed" : "Pending confirmation ⌛"}</Typography>
-                                            </Grid>
-                                            <Grid item>
-                                                <Typography variant="h6">
-                                                    🐸 {confirmation.user.name}
+                                            <AccordionActions>
+                                                <Typography>{confirmation.isConfirmed ? "✅" : "Pending ⌛"}
+                                                    &nbsp;{confirmation.user.name}
+                                                    &nbsp;&nbsp;&nbsp;
+                                                    {confirmation.isConfirmed ?
+                                                        <Button
+                                                            variant="outlined"
+                                                            color="primary"
+                                                            size='small'
+                                                            onClick={() => handleOpenCancellationConfirmation(confirmation.id)}
+                                                        >
+                                                            ❌ Cancel
+                                                        </Button>
+                                                        :
+                                                        <Button
+                                                            variant="outlined"
+                                                            color="primary"
+                                                            size='small'
+                                                            onClick={() => handleOpenConfirmConfirmation(confirmation.id)}
+                                                        >
+                                                            ✅ Confirm
+                                                        </Button>
+                                                    }
                                                 </Typography>
-                                            </Grid>
-                                            <Grid item>
-                                                {confirmation.isConfirmed ?
-                                                    <Button
-                                                        variant="outlined"
-                                                        color="primary"
-                                                        onClick={() => handleOpenCancellationConfirmation(confirmation.id)}
-                                                    >
-                                                        ❌ Cancel
-                                                    </Button>
-                                                    :
-                                                    <Button
-                                                        variant="outlined"
-                                                        color="primary"
-                                                        onClick={() => handleOpenConfirmConfirmation(confirmation.id)}
-                                                    >
-                                                        ✅ Confirm
-                                                    </Button>
-                                                }
-                                            </Grid>
+                                            </AccordionActions>
                                             {/* Confirm Confirmation Modal */}
                                             <Dialog open={confirmationConfirmationOpen} onClose={handleCloseConfirmConfirmation}>
                                                 <DialogTitle>Confirm meeting</DialogTitle>
@@ -280,42 +268,42 @@ const MeetingOwnerCard: React.FC<{ meeting: MeetingsWithMeetingConfirmationsAndG
                                                 </DialogActions>
                                             </Dialog>
                                         </Grid>
-                                    ))}
-                            {/* Edit meeting Button */}
-                            <DialogActions>
-                                <Button onClick={() => setEditMeetingOpen(true)} color="warning" disabled={isLoading}>
-                                    Edit meeting
-                                </Button>
-                            </DialogActions>
+                                    )
+                                )
+                        }
+                    </Accordion>
 
-                            {/* Delete meeting Button */}
-                            <DialogActions>
-                                <Button onClick={() => handleOpenDeletionConfirmation()} color="error" disabled={isLoading}>
-                                    Delete meeting
-                                </Button>
-                            </DialogActions>
-                            {/* Delete meeting Modal */}
-                            <Dialog open={confirmationDeletionOpen} onClose={handleCloseDeletionConfirmation}>
-                                <DialogTitle>Confirm deletion</DialogTitle>
-                                <DialogContent>
-                                    <Typography>
-                                        Are you sure you want to delete this meeting?
-                                        {meeting.meetingConfirmations.length > 1 ? "All confirmed guests will be reimbursed!" : ""}
-                                    </Typography>
-                                </DialogContent>
-                                <DialogActions>
-                                    <Button onClick={handleCloseDeletionConfirmation} color="primary">
-                                        Go back
-                                    </Button>
-                                    <Button onClick={() => handleDeleteMeeting(meeting.id)} color="primary" disabled={isLoading}>
-                                        Delete meeting
-                                    </Button>
-                                </DialogActions>
-                            </Dialog>
-                        </Grid>
+                    <Grid item xs={12}>
+                        {/* Edit meeting Button */}
+                        <Button onClick={() => setEditMeetingOpen(true)} color="warning" disabled={isLoading} fullWidth>
+                            Edit
+                        </Button>
+                        {/* Delete meeting Button */}
+                        <Button onClick={() => handleOpenDeletionConfirmation()} color="error" disabled={isLoading} fullWidth>
+                            Delete
+                        </Button>
                     </Grid>
-                </CardContent>
-            </Card>
+
+                    {/* Delete meeting Modal */}
+                    <Dialog open={confirmationDeletionOpen} onClose={handleCloseDeletionConfirmation}>
+                        <DialogTitle>Confirm deletion</DialogTitle>
+                        <DialogContent>
+                            <Typography>
+                                Are you sure you want to delete this meeting?
+                                {meeting.meetingConfirmations.length > 1 ? "All confirmed guests will be reimbursed!" : ""}
+                            </Typography>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={handleCloseDeletionConfirmation} color="primary">
+                                Go back
+                            </Button>
+                            <Button onClick={() => handleDeleteMeeting(meeting.id)} color="primary" disabled={isLoading}>
+                                Delete meeting
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+                </Grid>
+            </Grid>
 
             {/* Loading Spinner */}
             {isLoading && <CircularProgress />}
@@ -368,7 +356,7 @@ const MeetingOwnerCard: React.FC<{ meeting: MeetingsWithMeetingConfirmationsAndG
                     </DialogActions>
                 </Dialog>
             )}
-        </Box>
+        </Paper>
     );
 };
 

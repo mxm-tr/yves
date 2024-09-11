@@ -108,10 +108,6 @@ export default function MeetingsForm() {
                     {/* Loading Spinner */}
                     {isLoading && <CircularProgress />}
 
-                    {/* No Meetings Message */}
-                    <Box textAlign="center">
-                        <Typography variant="body1">Current slots</Typography>
-                    </Box>
                 </Grid>
                 <Grid item xs={8}>
                     {!isLoading && Array.from(meetingsWithMe).length > 0 ?

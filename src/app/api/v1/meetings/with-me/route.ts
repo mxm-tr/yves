@@ -2,11 +2,20 @@ import { auth } from "@/app/auth"
 import { getMeetingsTakenWithMe } from '@/app/lib/meetings';
 import { NextResponse } from "next/server"
 
-export const GET = auth(async function GET(req) {
-  if (req.auth && req.auth.user?.id) {
-    // Get current user
-    const meetings = await getMeetingsTakenWithMe(req.auth.user?.id);
-    return Response.json(meetings)
+export async function GET(
+  request: Request,
+  { params }: { params: { userId: string } }
+) {
+
+  const session = await auth();
+
+  if (!session || !session.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  return NextResponse.json({ message: "Not authenticated" }, { status: 401 })
-})
+
+  if (session && session.user?.id) {
+    // Get a user's available schedules
+    const users = await getMeetingsTakenWithMe(session.user?.id);
+    return Response.json(users)
+  }
+}

@@ -20,7 +20,7 @@ import UserCard from '../components/userCard';
 import MeetingConfirmationCard from '../components/meetingConfirmationCard';
 import Sidebar from '../components/sidebar';
 import Timeline from '../components/Timeline';
-import { MeetingConfirmationsWithMeetingAndOwner } from '../lib/models';
+import { MeetingConfirmationsWithMeetingAndOwnerAndGuests } from '../lib/models';
 
 // Helper function to format the date
 function formatDate(date: Date, locale: string): string {
@@ -29,16 +29,16 @@ function formatDate(date: Date, locale: string): string {
 };
 
 interface GroupedMeetingConfirmations {
-    groups: Map<string, Array<MeetingConfirmationsWithMeetingAndOwner>>;
+    groups: Map<string, Array<MeetingConfirmationsWithMeetingAndOwnerAndGuests>>;
     dates: Array<string>;
 }
 
 // Helper function to group meetings by date and generate a list of all dates in range
 function groupMeetingsByDate(
-    meetings: Array<MeetingConfirmationsWithMeetingAndOwner>,
+    meetings: Array<MeetingConfirmationsWithMeetingAndOwnerAndGuests>,
     locale: string
 ): GroupedMeetingConfirmations {
-    const groups: Map<string, Array<MeetingConfirmationsWithMeetingAndOwner>> = new Map();
+    const groups: Map<string, Array<MeetingConfirmationsWithMeetingAndOwnerAndGuests>> = new Map();
     const dates = new Set<string>();
 
     meetings.forEach((meetingConfirmation) => {
@@ -60,7 +60,7 @@ function groupMeetingsByDate(
 // Main component
 export default function Planning() {
     const session = useSession();
-    const [meetings, setMeetings] = useState<Array<MeetingConfirmationsWithMeetingAndOwner>>([]);
+    const [meetings, setMeetings] = useState<Array<MeetingConfirmationsWithMeetingAndOwnerAndGuests>>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [expandedDate, setExpandedDate] = useState<string | null>(null); // State to track expanded Accordion
@@ -130,6 +130,12 @@ export default function Planning() {
                             {isLoading && <CircularProgress />}
                             {error && <Typography variant="h6" color="error">{error}</Typography>}
                         </Box>
+
+                        {dates.length < 1 ?
+                            <Box textAlign="center" >
+                                <Typography>Nothing confirmed yet, go create a slot or invite someone!</Typography>
+                            </Box> : ""
+                        }
 
                         {/* Display Meetings by Date */}
                         <Grid container spacing={2}>
