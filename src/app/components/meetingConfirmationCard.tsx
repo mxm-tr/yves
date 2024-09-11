@@ -27,7 +27,7 @@ const MeetingConfirmationCard: React.FC<{ meetingConfirmation: MeetingConfirmati
             setCancelConfirmationOpen(false);
 
             // Send a POST request to the backend API
-            const response = await fetch(`/api/v1/meetings/${meetingConfirmation.id}/cancel`, { method: 'POST' });
+            const response = await fetch(`/api/v1/meetings/cancel/${meetingConfirmation.id}`, { method: 'POST' });
 
             if (response.ok) {
                 // If the response status is 200 OK, set isCanceld to true to hide the card

@@ -11,11 +11,13 @@ const prisma = new PrismaClient();
 export async function createMeeting({
     date,
     cost,
+    durationMinutes,
     numberOfGuests,
     ownerId,
 }: {
     date: Date;
     cost: number;
+    durationMinutes: number;
     numberOfGuests: number;
     ownerId: string;
 }): Promise<Meeting> {
@@ -32,6 +34,45 @@ export async function createMeeting({
         data: {
             date,
             cost,
+            durationMinutes,
+            numberOfGuests,
+            ownerId,
+        },
+    });
+
+    return newMeeting;
+}
+
+export async function editMeeting(
+    meetingId: string,
+    {
+        date,
+        cost,
+        durationMinutes,
+        numberOfGuests,
+        ownerId,
+    }: {
+        date: Date;
+        cost: number;
+        durationMinutes: number;
+        numberOfGuests: number;
+        ownerId: string;
+    }): Promise<Meeting> {
+    // Validation logic
+    if (cost < 0) {
+        throw new Error("Cost cannot be negative");
+    }
+    if (numberOfGuests <= 0) {
+        throw new Error("Number of guests must be at least 1");
+    }
+
+    // Update a meeting
+    const newMeeting = await prisma.meeting.update({
+        where: { id: meetingId },
+        data: {
+            date,
+            cost,
+            durationMinutes,
             numberOfGuests,
             ownerId,
         },
@@ -193,8 +234,34 @@ export async function writeMeeting(newMeeting: Meeting): Promise<void> {
     await prisma.meeting.create({ data: newMeeting });
 }
 
-export async function deleteMeeting(userId: string, meetingId: string): Promise<void> {
-    await prisma.meeting.delete({ where: { id: meetingId, ownerId: userId } });
+export async function deleteMeeting(currentUserId: string, meetingId: string): Promise<void> {
+    // Get the current user
+    const currentUser = await prisma.user.findUnique({ where: { id: currentUserId } });
+
+    if (!currentUser) {
+        throw new Error('User not found');
+    }
+
+    // Check if the meeting exists
+    const existingMeeting = await prisma.meeting.findUnique({
+        where: { ownerId: currentUser.id, id: meetingId },
+    });
+
+    if (!existingMeeting) {
+        // Throw a custom error for non-existing meeting
+        throw new Error('Meeting not found');
+    }
+
+    // Get all meeting confirmations ids and cancel them
+    const existingMeetingConfirmations = await prisma.meetingConfirmation.findMany({
+        where: { meetingId: meetingId },
+        select: { id: true }
+    });
+    existingMeetingConfirmations.map((meetingConfirmation) => {
+        cancelMeeting(currentUserId, meetingConfirmation.id)
+    })
+
+    await prisma.meeting.delete({ where: { ownerId: currentUserId, id: meetingId } });
 }
 
 export async function bookMeeting(userId: string, meetingId: string): Promise<string> {

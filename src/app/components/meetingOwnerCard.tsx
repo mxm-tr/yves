@@ -4,21 +4,39 @@ import React, { useState } from 'react';
 import {
     Button, Card, CardContent, Fade, Grid, Typography, Dialog, DialogTitle, DialogContent,
     List, ListItem,
-    DialogActions, CircularProgress
+    DialogActions, CircularProgress,
+    Box
 } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import CheckIcon from '@mui/icons-material/Check';
 
 import { MeetingsWithMeetingConfirmationsAndGuests } from '../lib/models';
+import EditMeetingForm from '../meetings-with-me/EditMeetingForm';
 
 const MeetingOwnerCard: React.FC<{ meeting: MeetingsWithMeetingConfirmationsAndGuests, triggerReload: Function }> = ({ meeting, triggerReload }) => {
 
+    // Confirmation windows
     const [confirmationConfirmationOpen, setConfirmConfirmationOpen] = useState(false);
     const [confirmationCancellationOpen, setConfirmCancellationOpen] = useState(false);
-    const [isConfirmed, setIsConfirmed] = useState(false);
+    const [confirmationDeletionOpen, setConfirmDeletionOpen] = useState(false);
+
+    // Meeting editor modal
+    const [editMeetingOpen, setEditMeetingOpen] = useState(false);
+
+    const [selectedConfirmationId, setSelectedConfirmationId] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+
+    const modalStyle = {
+        position: 'absolute' as 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        bgcolor: 'background.paper',
+        boxShadow: 24,
+        p: 4,
+    };
 
     const handleParentReload = () => {
         // Invoke the callback to trigger the reload in the parent
@@ -27,6 +45,51 @@ const MeetingOwnerCard: React.FC<{ meeting: MeetingsWithMeetingConfirmationsAndG
 
     // Locale for date and time format
     let defaultLocale = (typeof navigator !== 'undefined' && navigator.language) || 'en-US';
+
+    async function handleDeleteMeeting(meetingId: string) {
+        try {
+            // Show loading state
+            setIsLoading(true);
+
+            // Close the delete confirmation modal
+            setConfirmDeletionOpen(false);
+
+            // Send a confirmation request to the backend API
+            const response = await fetch(`/api/v1/meetings/${meetingId}`, { method: 'DELETE' });
+
+            if (response.ok) {
+
+                // Show success alert
+                setShowSuccessAlert(true);
+
+                // Trigger the reload of the parent component
+                handleParentReload()
+
+            } else {
+                // Handle non-successful response (e.g., display an error message)
+                console.error('Error deleting meeting. Status:', response.status);
+                setError('Error deleting meeting. Please try again later.');
+            }
+        } catch (error) {
+            console.error('Error deleting meeting', error);
+            setError('Error deleting meeting. Please try again later.');
+        } finally {
+            // Hide loading state
+            setIsLoading(false);
+        }
+    };
+
+    const handleOpenDeletionConfirmation = () => {
+        // Open the delete confirmation modal
+        setConfirmDeletionOpen(true);
+    };
+
+    const handleCloseDeletionConfirmation = () => {
+        // Close the delete confirmation modal
+        setConfirmDeletionOpen(false);
+        // Clear any previous error
+        setError('');
+    };
 
     async function handleConfirmMeeting(meetingConfirmationId: string) {
         try {
@@ -37,12 +100,9 @@ const MeetingOwnerCard: React.FC<{ meeting: MeetingsWithMeetingConfirmationsAndG
             setConfirmConfirmationOpen(false);
 
             // Send a confirmation request to the backend API
-            const response = await fetch(`/api/v1/meetings/${meetingConfirmationId}/confirm`, { method: 'POST' });
+            const response = await fetch(`/api/v1/meetings/confirm/${meetingConfirmationId}`, { method: 'POST' });
 
             if (response.ok) {
-
-                // If the response status is 200 OK, set isConfirmed to true to hide the card
-                setIsConfirmed(true);
 
                 // Show success alert
                 setShowSuccessAlert(true);
@@ -64,6 +124,20 @@ const MeetingOwnerCard: React.FC<{ meeting: MeetingsWithMeetingConfirmationsAndG
         }
     };
 
+    function handleOpenConfirmConfirmation(confirmationId: string) {
+        // Set the selected confirmation id
+        setSelectedConfirmationId(confirmationId);
+        // Open the delete confirmation modal
+        setConfirmConfirmationOpen(true);
+    };
+
+    const handleCloseConfirmConfirmation = () => {
+        // Close the delete confirmation modal
+        setConfirmConfirmationOpen(false);
+        // Clear any previous error
+        setError('');
+    };
+
     async function handleCancelMeeting(meetingConfirmationId: string) {
         try {
             // Show loading state
@@ -73,12 +147,9 @@ const MeetingOwnerCard: React.FC<{ meeting: MeetingsWithMeetingConfirmationsAndG
             setConfirmCancellationOpen(false);
 
             // Send a confirmation request to the backend API
-            const response = await fetch(`/api/v1/meetings/${meetingConfirmationId}/cancel`, { method: 'POST' });
+            const response = await fetch(`/api/v1/meetings/cancel/${meetingConfirmationId}`, { method: 'POST' });
 
             if (response.ok) {
-
-                // If the response status is 200 OK, set isConfirmed to true to hide the card
-                setIsConfirmed(true);
 
                 // Show success alert
                 setShowSuccessAlert(true);
@@ -100,20 +171,9 @@ const MeetingOwnerCard: React.FC<{ meeting: MeetingsWithMeetingConfirmationsAndG
         }
     };
 
-    const handleOpenConfirmConfirmation = () => {
-        // Open the delete confirmation modal
-        setConfirmConfirmationOpen(true);
-    };
-
-    const handleCloseConfirmConfirmation = () => {
-        // Close the delete confirmation modal
-        setConfirmConfirmationOpen(false);
-        // Clear any previous error
-        setError('');
-    };
-
-
-    const handleOpenCancellationConfirmation = () => {
+    function handleOpenCancellationConfirmation(confirmationId: string) {
+        // Set the selected confirmation id
+        setSelectedConfirmationId(confirmationId);
         // Open the delete confirmation modal
         setConfirmCancellationOpen(true);
     };
@@ -126,7 +186,7 @@ const MeetingOwnerCard: React.FC<{ meeting: MeetingsWithMeetingConfirmationsAndG
     };
 
     return (
-        <>
+        <Box>
             <Card key={meeting.id} style={{ marginBottom: 16 }}>
                 <CardContent>
                     <Grid container direction="column" alignItems="center" spacing={2}>
@@ -151,12 +211,10 @@ const MeetingOwnerCard: React.FC<{ meeting: MeetingsWithMeetingConfirmationsAndG
                             </Typography>
                         </Grid>
                         <Grid item>
-
                             {
                                 meeting.meetingConfirmations.length < 1 ?
                                     <Grid item>
                                         <Typography variant="h6">No one booked yet :(</Typography>
-
                                     </Grid>
                                     : meeting.meetingConfirmations.map((confirmation) => (
                                         <Grid item key={confirmation.id}>
@@ -169,11 +227,11 @@ const MeetingOwnerCard: React.FC<{ meeting: MeetingsWithMeetingConfirmationsAndG
                                                 </Typography>
                                             </Grid>
                                             <Grid item>
-                                                {confirmation && confirmation.isConfirmed ?
+                                                {confirmation.isConfirmed ?
                                                     <Button
                                                         variant="outlined"
                                                         color="primary"
-                                                        onClick={handleOpenCancellationConfirmation}
+                                                        onClick={() => handleOpenCancellationConfirmation(confirmation.id)}
                                                     >
                                                         ❌ Cancel
                                                     </Button>
@@ -181,7 +239,7 @@ const MeetingOwnerCard: React.FC<{ meeting: MeetingsWithMeetingConfirmationsAndG
                                                     <Button
                                                         variant="outlined"
                                                         color="primary"
-                                                        onClick={handleOpenConfirmConfirmation}
+                                                        onClick={() => handleOpenConfirmConfirmation(confirmation.id)}
                                                     >
                                                         ✅ Confirm
                                                     </Button>
@@ -213,7 +271,7 @@ const MeetingOwnerCard: React.FC<{ meeting: MeetingsWithMeetingConfirmationsAndG
                                                     </Typography>
                                                 </DialogContent>
                                                 <DialogActions>
-                                                    <Button onClick={handleCloseCancellationConfirmation} color="primary">
+                                                    <Button onClick={() => handleCloseCancellationConfirmation()} color="primary">
                                                         Go back
                                                     </Button>
                                                     <Button onClick={() => handleCancelMeeting(confirmation.id)} color="primary" disabled={isLoading}>
@@ -223,6 +281,37 @@ const MeetingOwnerCard: React.FC<{ meeting: MeetingsWithMeetingConfirmationsAndG
                                             </Dialog>
                                         </Grid>
                                     ))}
+                            {/* Edit meeting Button */}
+                            <DialogActions>
+                                <Button onClick={() => setEditMeetingOpen(true)} color="warning" disabled={isLoading}>
+                                    Edit meeting
+                                </Button>
+                            </DialogActions>
+
+                            {/* Delete meeting Button */}
+                            <DialogActions>
+                                <Button onClick={() => handleOpenDeletionConfirmation()} color="error" disabled={isLoading}>
+                                    Delete meeting
+                                </Button>
+                            </DialogActions>
+                            {/* Delete meeting Modal */}
+                            <Dialog open={confirmationDeletionOpen} onClose={handleCloseDeletionConfirmation}>
+                                <DialogTitle>Confirm deletion</DialogTitle>
+                                <DialogContent>
+                                    <Typography>
+                                        Are you sure you want to delete this meeting?
+                                        {meeting.meetingConfirmations.length > 1 ? "All confirmed guests will be reimbursed!" : ""}
+                                    </Typography>
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button onClick={handleCloseDeletionConfirmation} color="primary">
+                                        Go back
+                                    </Button>
+                                    <Button onClick={() => handleDeleteMeeting(meeting.id)} color="primary" disabled={isLoading}>
+                                        Delete meeting
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
                         </Grid>
                     </Grid>
                 </CardContent>
@@ -250,6 +339,20 @@ const MeetingOwnerCard: React.FC<{ meeting: MeetingsWithMeetingConfirmationsAndG
                 </Alert>
             </Fade>
 
+            {/* Edit meeting Modal */}
+            <Dialog open={editMeetingOpen}>
+                <DialogContent>
+                    <EditMeetingForm meetingId={meeting.id} oldCost={meeting.cost}
+                        oldDateAndTimeIso={meeting.date} oldDuration={meeting.durationMinutes}
+                        oldNumberOfGuests={meeting.numberOfGuests} onEditMeeting={() => handleParentReload()}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setEditMeetingOpen(false)} color="primary">
+                        Cancel
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             {/* Error Modal */}
             {error && (
@@ -265,7 +368,7 @@ const MeetingOwnerCard: React.FC<{ meeting: MeetingsWithMeetingConfirmationsAndG
                     </DialogActions>
                 </Dialog>
             )}
-        </>
+        </Box>
     );
 };
 

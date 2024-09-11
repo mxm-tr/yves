@@ -15,7 +15,7 @@ export const POST = auth(async function POST(req) {
   if (req.auth && req.auth.user?.id) {
     try {
       const body = await req.json();
-      const { date, cost, numberOfGuests } = body;
+      const { date, cost, durationMinutes, numberOfGuests } = body;
 
       // Validate the input (you can add more validation as needed)
       if (!date || typeof cost !== 'number' || typeof numberOfGuests !== 'number') {
@@ -26,6 +26,7 @@ export const POST = auth(async function POST(req) {
       const newMeeting = await createMeeting({
         date: new Date(date),
         cost,
+        durationMinutes,
         numberOfGuests,
         ownerId: req.auth.user.id,
       });

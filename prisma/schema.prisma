@@ -88,7 +88,10 @@ model User {
 
 model Meeting {
   id      String   @id @default(cuid())
+  
   date    DateTime
+  durationMinutes Int @default(60)
+
   owner   User     @relation(fields: [ownerId], references: [id])
   ownerId String   @map("user_id")
 

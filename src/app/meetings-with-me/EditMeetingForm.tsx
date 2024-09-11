@@ -3,14 +3,21 @@ import { useState } from 'react';
 import { Box, Button, Divider, Grid, Typography, TextField } from '@mui/material';
 import { DatePicker, TimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 
-export default function NewMeetingForm({ onCreateMeeting }: { onCreateMeeting: () => void }) {
-    const [date, setDate] = useState<Dayjs | null>(null);
-    const [time, setTime] = useState<Dayjs | null>(null);
-    const [cost, setCost] = useState(0);
-    const [duration, setDuration] = useState(60);
-    const [numberOfGuests, setNumberOfGuests] = useState(1);
+export default function EditMeetingForm({ meetingId, oldDateAndTimeIso, oldCost, oldDuration, oldNumberOfGuests, onEditMeeting }: {
+    meetingId: string,
+    oldDateAndTimeIso: Date,
+    oldCost: number,
+    oldDuration: number,
+    oldNumberOfGuests: number,
+    onEditMeeting: () => void
+}) {
+    const [date, setDate] = useState<Dayjs | null>(dayjs(oldDateAndTimeIso));
+    const [time, setTime] = useState<Dayjs | null>(dayjs(oldDateAndTimeIso));
+    const [cost, setCost] = useState(oldCost);
+    const [duration, setDuration] = useState(oldDuration);
+    const [numberOfGuests, setNumberOfGuests] = useState(oldNumberOfGuests);
     const [error, setError] = useState('');
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -25,7 +32,7 @@ export default function NewMeetingForm({ onCreateMeeting }: { onCreateMeeting: (
         const meetingDate = date.set('hour', time.hour()).set('minute', time.minute());
 
         try {
-            const res = await fetch('/api/v1/meetings', {
+            const res = await fetch('/api/v1/meetings/' + meetingId, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -33,14 +40,15 @@ export default function NewMeetingForm({ onCreateMeeting }: { onCreateMeeting: (
                 body: JSON.stringify({
                     date: meetingDate.toISOString(),
                     cost,
+                    duration,
                     numberOfGuests,
                 }),
             });
 
             if (res.ok) {
-                onCreateMeeting();
+                onEditMeeting();
             } else {
-                setError('Failed to create meeting');
+                setError('Failed to edit meeting');
             }
         } catch (err) {
             setError('An error occurred. Please try again.');
@@ -51,9 +59,13 @@ export default function NewMeetingForm({ onCreateMeeting }: { onCreateMeeting: (
         <Grid container spacing={2}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <Box>
-                    <Typography variant="h5" mb={2}>Let&apos;s go!</Typography>
                     <form onSubmit={handleSubmit}>
                         <Grid container spacing={2}>
+                            <Grid item xs={12} >
+                                <Typography>
+                                    Are you sure you want to edit this meeting? All confirmed guests will have to reconfirm!
+                                </Typography>
+                            </Grid>
                             <Grid item xs={12} sm={6}>
                                 <DatePicker
                                     label="Date"
@@ -106,9 +118,9 @@ export default function NewMeetingForm({ onCreateMeeting }: { onCreateMeeting: (
                                     <Typography color="error">{error}</Typography>
                                 </Grid>
                             )}
-                            <Grid item xs={12} sm={6} alignItems='center'>
+                            <Grid item xs={12} alignItems='center'>
                                 <Button variant="contained" color="primary" type="submit" fullWidth>
-                                    Create
+                                    Confirm
                                 </Button>
                             </Grid>
                         </Grid>
