@@ -1,7 +1,10 @@
 'use client'
 import React, { useState } from 'react';
-import { Button, Card, CardContent, Fade, Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@mui/material';
-import Alert from '@mui/material/Alert';
+import { Button, Card, CardContent, Box, Chip, Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Fade, Alert } from '@mui/material';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
 
 import { Meeting, User, MeetingConfirmation } from '@prisma/client';
@@ -68,36 +71,41 @@ const MeetingConfirmationCard: React.FC<{ meetingConfirmation: MeetingConfirmati
     return (
         <>
             {!isCanceld && (
-                <Card key={meetingConfirmation.id} style={{ marginBottom: 16 }}>
+                <Card style={{ marginBottom: 16, borderRadius: 12, boxShadow: '0 2px 10px rgba(0,0,0,0.15)' }}>
                     <CardContent>
                         <Grid container direction="column" alignItems="center" spacing={2}>
                             <Grid item>
-                                <Typography variant="h6">
-                                    {meetingConfirmation.isConfirmed ? "✅ Confirmed" : "Pending confirmation ⌛"}
-                                    &nbsp;(🪙&nbsp;{meetingConfirmation.meeting.cost})
-                                </Typography>
+                                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                                    <Chip
+                                        label={meetingConfirmation.isConfirmed ? "Confirmed" : "Pending Confirmation"}
+                                        color={meetingConfirmation.isConfirmed ? "success" : "warning"}
+                                        icon={meetingConfirmation.isConfirmed ? <CheckCircleIcon /> : <HourglassEmptyIcon />}
+                                    />
+                                    <Typography variant="body2" color="text.secondary">&emsp;🪙 {meetingConfirmation.meeting.cost}</Typography>
+                                </Box>
                             </Grid>
                             <Grid item>
-                                <Typography variant="h6">
-                                    ⏰ {new Date(meetingConfirmation.meeting.date).toLocaleTimeString(defaultLocale, { hour: '2-digit', minute: '2-digit' })}
-                                    &nbsp;({meetingConfirmation.meeting.durationMinutes} mn)
-                                </Typography>
+                                <Box display="flex" alignItems="center" mb={2}>
+                                    <AccessTimeIcon color="action" style={{ marginRight: 8 }} />
+                                    <Typography variant="h6">
+                                        {new Date(meetingConfirmation.meeting.date).toLocaleTimeString(defaultLocale, { hour: '2-digit', minute: '2-digit' })}
+                                        &nbsp;({meetingConfirmation.meeting.durationMinutes} mn)
+                                    </Typography>
+                                </Box>
                             </Grid>
                             <Grid item>
-                                <Typography textAlign={'center'}>
-                                    ✨ {meetingConfirmation.meeting.owner.name} ✨
-                                    <br />&<br />
-                                    ✨ {meetingConfirmation.user.name} ✨
-                                </Typography>
+                                <Box textAlign="center" mb={2}>
+                                    <Typography variant="subtitle1" fontWeight="bold">✨ {meetingConfirmation.meeting.owner.name} ✨</Typography>
+                                    <Typography variant="body1" color="text.secondary" mb={1}>&amp;</Typography>
+                                    <Typography variant="subtitle1" fontWeight="bold">✨ {meetingConfirmation.user.name} ✨</Typography>
+                                </Box>
                             </Grid>
                             <Grid item>
-                                <Button
-                                    variant="outlined"
-                                    color="primary"
-                                    onClick={handleOpenCancelConfirmation}
-                                >
-                                    🗑️ Cancel
-                                </Button>
+                                <Box display="flex" justifyContent="center">
+                                    <Button variant="outlined" color="error" startIcon={<DeleteIcon />} onClick={handleOpenCancelConfirmation}
+                                    > Cancel
+                                    </Button>
+                                </Box>
                             </Grid>
                         </Grid>
                     </CardContent>

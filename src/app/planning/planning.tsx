@@ -95,8 +95,17 @@ export default function Planning() {
     }
 
     const handleCancel = () => {
-        // Trigger a reload by setting a dummy state
-        setMeetings([...meetings]);
+        setIsLoading(true); // Show loading state
+        fetch('/api/v1/meetings')
+            .then((res) => res.json())
+            .then((data) => {
+                Array.isArray(data) ? setMeetings(data) : setMeetings([]);
+                setIsLoading(false);
+            })
+            .catch(err => {
+                setError('Failed to reload meetings.');
+                setIsLoading(false);
+            });
     };
 
     return (
@@ -139,32 +148,36 @@ export default function Planning() {
 
                         {/* Display Meetings by Date */}
                         <Grid container spacing={2}>
-                            {dates.map(date => (
+                            {dates.map((date, index) => (
                                 <Grid item xs={12} key={date}>
-                                    <Paper elevation={2} sx={{ mb: 2 }}>
+                                    <Paper
+                                        elevation={3}
+                                        sx={{ mb: 2, borderRadius: 3, overflow: 'hidden', boxShadow: 3 }}
+                                    >
                                         <Accordion
-                                            expanded={expandedDate === date}
+                                            expanded={expandedDate === date || (!expandedDate && index === 0)}
                                             onChange={() => setExpandedDate(expandedDate === date ? null : date)}
+                                            sx={{ p: 1 }}
                                         >
                                             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                                <Box p={2} width="100%">
-                                                    <Typography variant="h4">{date}</Typography>
-                                                </Box>
+                                                <Typography variant="h5" fontWeight="bold">
+                                                    {date}
+                                                </Typography>
                                             </AccordionSummary>
                                             <AccordionDetails>
                                                 {groupedMeetingConfirmations.get(date) && groupedMeetingConfirmations.get(date)!.length > 0 ? (
                                                     <Grid container spacing={2}>
                                                         {groupedMeetingConfirmations.get(date)?.map(meetingConfirmation => (
-                                                            <Grid item xs={12} sm={6} md={5} lg={4} key={meetingConfirmation.id}>
+                                                            <Grid item xs={12} sm={6} md={4} key={meetingConfirmation.id}>
                                                                 <MeetingConfirmationCard
                                                                     meetingConfirmation={meetingConfirmation}
-                                                                    onCancel={handleCancel} // Pass the handleCancel function
+                                                                    onCancel={handleCancel}
                                                                 />
                                                             </Grid>
                                                         ))}
                                                     </Grid>
                                                 ) : (
-                                                    <Typography variant="body1" color="textSecondary" textAlign="center">
+                                                    <Typography variant="body2" textAlign="center" color="textSecondary">
                                                         No meetings scheduled for this day.
                                                     </Typography>
                                                 )}

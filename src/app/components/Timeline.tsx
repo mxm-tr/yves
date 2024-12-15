@@ -1,4 +1,4 @@
-import { Box, Typography, Divider, Stack, ListItemButton } from '@mui/material';
+import { Box, Chip, Typography, Divider, Stack, ListItemButton } from '@mui/material';
 
 type TimelineItem = {
     date: string;
@@ -10,17 +10,27 @@ const Timeline = ({ events, onTimelineItemClick }: { events: TimelineItem[], onT
     return (
         <Box sx={{ position: 'sticky', top: 0, height: '100vh', overflowY: 'auto', padding: 2 }}>
 
-            <Typography variant="h5" gutterBottom>Timeline</Typography>
-
+            <Typography variant="h6" sx={{ mb: 2 }}>Timeline</Typography>
             <Stack spacing={2}>
                 {events.map((event, index) => (
                     <Stack key={index} spacing={1}>
-                        <ListItemButton onClick={() => onTimelineItemClick(event.date)} sx={{ borderRadius: 1, '&:hover': { backgroundColor: 'action.hover' } }}>
+                        <ListItemButton onClick={() => onTimelineItemClick(event.date)}
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                            }}
+                        >
                             <Stack direction="row" alignItems="center">
                                 <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{event.date}</Typography>
                             </Stack>
                         </ListItemButton>
-                        <Typography variant="body2">{event.content}</Typography>
+                        <Chip
+                            label={event.content}
+                            color="primary"
+                            variant="outlined"
+                            size="small"
+                        />
                         {index < events.length - 1 && <Divider />}
                     </Stack>
                 ))}
