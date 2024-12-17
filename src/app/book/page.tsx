@@ -1,5 +1,5 @@
 import { auth } from "@/app/auth"
-import ScheduleForm from "@/app/book/schedule"
+import ScheduleForm from "@/app/book/book"
 import { SessionProvider } from "next-auth/react"
 
 export default async function ClientPage() {
@@ -8,6 +8,7 @@ export default async function ClientPage() {
     // TODO: Look into https://react.dev/reference/react/experimental_taintObjectReference
     // filter out sensitive data before passing to client.
     session.user = {
+      id: session.user.id,
       name: session.user.name,
       email: session.user.email,
       image: session.user.image,

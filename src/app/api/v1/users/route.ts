@@ -1,6 +1,6 @@
 import { auth } from "@/app/auth"
 import { getAcquaintances } from '@/app/lib/users';
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 
 export const GET = auth(async function GET(req) {
   if (req.auth && req.auth.user?.id) {

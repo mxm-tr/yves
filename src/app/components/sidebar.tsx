@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link';
-import * as React from 'react';
+import { useState, useEffect, Fragment, KeyboardEvent, MouseEvent } from 'react';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import Button from '@mui/material/Button';
@@ -14,27 +14,58 @@ import EditIcon from '@mui/icons-material/Edit';
 import MoodIcon from '@mui/icons-material/Mood';
 import HomeIcon from '@mui/icons-material/Home';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Typography, Divider, IconButton } from '@mui/material';
+import QrCodeIcon from '@mui/icons-material/QrCode';
+import { Dialog, DialogContent, Divider, Modal } from '@mui/material';
 import UserCard from './userCard';
+import { User } from '@prisma/client';
 import { useSession } from 'next-auth/react';
+import QRCode from './qrCodeGenerator';
 
 export default function Sidebar() {
 
     const session = useSession();
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [qrModalOpen, setQrModalOpen] = useState(false);
 
-    const [drawerOpen, setDrawerOpen] = React.useState(false);
-
-    const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
+    const toggleDrawer = (open: boolean) => (event: KeyboardEvent | MouseEvent) => {
         if (
             event.type === 'keydown' &&
-            ((event as React.KeyboardEvent).key === 'Tab' ||
-                (event as React.KeyboardEvent).key === 'Shift')
+            ((event as KeyboardEvent).key === 'Tab' ||
+                (event as KeyboardEvent).key === 'Shift')
         ) {
             return;
         }
 
         setDrawerOpen(open);
     };
+
+    const handleOpenQrModal = () => setQrModalOpen(true);
+    const handleCloseQrModal = () => setQrModalOpen(false);
+
+    const [user, setUser] = useState<User>();
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await fetch(
+                    '/api/v1/me'
+                );
+                if (response.ok) {
+                    const userData = await response.json();
+                    setUser(userData);
+                } else {
+                    console.error('Failed to fetch user data');
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchUserData();
+    }, []);
 
     const drawerContent = (
         <Box
@@ -72,12 +103,21 @@ export default function Sidebar() {
                         <ListItemText primary="Manage my slots" />
                     </ListItemButton>
                 </ListItem>
+                {(user ?
+                <ListItem disablePadding>
+                    {/* New Button to Open QR Code Modal */}
+                    <ListItemButton onClick={handleOpenQrModal}>
+                        <ListItemIcon><QrCodeIcon /></ListItemIcon>
+                        <ListItemText primary="My QR code" />
+                    </ListItemButton>
+                </ListItem>
+                :<div/>)}
             </List>
         </Box>
     );
 
     return (
-        <React.Fragment>
+        <Fragment>
             <Box sx={{ display: 'flex', alignItems: 'center', padding: 1 }}>
                 <Button
                     variant="contained"
@@ -100,7 +140,20 @@ export default function Sidebar() {
                 >
                     {drawerContent}
                 </Drawer>
+                {/* Modal for QR Code Generator */}
+                {(user ?
+                    <Dialog
+                        open={qrModalOpen}
+                        onClose={handleCloseQrModal}
+                        aria-labelledby="qr-modal-title"
+                        aria-describedby="qr-modal-description"
+                    >
+                        <DialogContent>
+                            <QRCode userID={user.id} />
+                        </DialogContent>
+                    </Dialog>
+                    : <div/>)}
             </Box>
-        </React.Fragment>
+        </Fragment>
     );
 }

@@ -32,8 +32,73 @@ export async function incrementUserWallet(userId: string, amount: number): Promi
 }
 
 
-export async function getAcquaintances(userId: string): Promise<User[]> {
-  const currentUser = await prisma.user.findUnique({ where: { id: userId } });
+export async function getAcquaintance(currentUserId: string, userId: string): Promise<Response> {
+  const currentUser = await prisma.user.findUnique({ where: { id: currentUserId } });
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+
+  if (!user) {
+    return new Response('User amount not found', { status: 404 })
+  }
+
+  const userFound = await prisma.user.findFirstOrThrow({
+    relationLoadStrategy: 'join', // or 'query'
+    include: {
+      // Join followers
+      followers: {
+        select: {
+          follower: {
+            select: {
+              id: true,
+              name: true,
+            }
+          }
+        }
+      },
+      // Join followed
+      followed: {
+        select: {
+          followed: {
+            select: {
+              id: true,
+              name: true,
+            }
+          }
+        }
+      }
+    },
+    // Only consider the following requests that were accepted
+    where: {
+      AND: [
+        {
+          id: {equals: user!.id}
+        },
+        {
+          id: { not: currentUser!.id }
+        },
+        {
+          followers: {
+            every: {
+              confirmed: true
+            }
+          }
+        },
+        {
+          followed: {
+            every: {
+              confirmed: true
+            }
+          }
+        }
+      ]
+    }
+  }
+  )
+
+  return Response.json(user)
+}
+
+export async function getAcquaintances(currentUserId: string): Promise<User[]> {
+  const currentUser = await prisma.user.findUnique({ where: { id: currentUserId } });
   return prisma.user.findMany({
     relationLoadStrategy: 'join', // or 'query'
     include: {
