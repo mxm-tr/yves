@@ -2,11 +2,16 @@ import { auth } from "@/app/auth"
 import { getCurrentUser } from '@/app/lib/users';
 import { NextResponse } from "next/server"
 
-export const GET = auth(async function GET(req) {
-  if (req.auth && req.auth.user?.id) {
-    // Get current user
-    const user = await getCurrentUser(req.auth.user?.id);
-    return Response.json(user)
+export async function GET(
+  request: Request,
+) {
+  const session = await auth();
+
+  if (!session || !session.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  return NextResponse.json({ message: "Not authenticated" }, { status: 401 })
-})
+
+  // Get current user
+  const user = await getCurrentUser(session.user?.id);
+  return Response.json(user)
+}

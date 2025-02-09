@@ -4,10 +4,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { bookMeeting } from '@/app/lib/meetings';
 import { InsufficientCoinsError } from '@/app/lib/models';
 
-export async function POST(
-    request: Request,
-    { params }: { params: { slug: string } }
-) {
+export async function POST(request: Request, props: { params: Promise<{ slug: string }> }) {
+    const params = await props.params;
 
     const session = await auth();
 

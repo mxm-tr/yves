@@ -2,19 +2,27 @@ import { auth } from "@/app/auth"
 import { getMeetings, createMeeting } from '@/app/lib/meetings';
 import { NextResponse } from "next/server"
 
-export const GET = auth(async function GET(req) {
-  if (req.auth && req.auth.user?.id) {
+export async function GET(
+  request: Request,
+) {
+  const session = await auth();
+
+  if (session && session.user?.id) {
     // Get current user's meetings
-    const meetings = await getMeetings(req.auth.user?.id);
+    const meetings = await getMeetings(session.user?.id);
     return Response.json(meetings)
   }
   return NextResponse.json({ message: "Not authenticated" }, { status: 401 })
-});
+};
 
-export const POST = auth(async function POST(req) {
-  if (req.auth && req.auth.user?.id) {
+export async function POST(
+  request: Request,
+) {
+  const session = await auth();
+
+  if (session && session.user?.id) {
     try {
-      const body = await req.json();
+      const body = await request.json();
       const { date, cost, durationMinutes, numberOfGuests } = body;
 
       // Validate the input (you can add more validation as needed)
@@ -28,7 +36,7 @@ export const POST = auth(async function POST(req) {
         cost,
         durationMinutes,
         numberOfGuests,
-        ownerId: req.auth.user.id,
+        ownerId: session.user?.id,
       });
 
       return NextResponse.json(newMeeting, { status: 201 });
@@ -38,4 +46,4 @@ export const POST = auth(async function POST(req) {
     }
   }
   return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
-});
+}

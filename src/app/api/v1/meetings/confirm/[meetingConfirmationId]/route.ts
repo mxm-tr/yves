@@ -5,8 +5,9 @@ import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(
   request: Request,
-  { params }: { params: { meetingConfirmationId: string } }
+  props: { params: Promise<{ meetingConfirmationId: string }> }
 ) {
+  const params = await props.params;
   try {
 
     const session = await auth();

@@ -2,10 +2,8 @@ import { auth } from "@/app/auth"
 import { editMeeting, deleteMeeting } from '@/app/lib/meetings';
 import { NextResponse } from "next/server"
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { meetingId: string } } // It's actually a meetingId...
-) {
+export async function DELETE(request: Request, props: { params: Promise<{ meetingId: string }> }) {
+  const params = await props.params;
 
   const session = await auth();
 
@@ -20,10 +18,8 @@ export async function DELETE(
   })
 }
 
-export async function POST(
-  request: Request,
-  { params }: { params: { meetingId: string } }
-) {
+export async function POST(request: Request, props: { params: Promise<{ meetingId: string }> }) {
+  const params = await props.params;
 
   const session = await auth();
 

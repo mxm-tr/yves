@@ -2,10 +2,7 @@ import { auth } from "@/app/auth"
 import { getCurrentUserMeetingsGroupedByDay } from '@/app/lib/meetings';
 import { NextResponse } from "next/server"
 
-export async function GET(
-  request: Request,
-  { params }: { params: { userId: string } }
-) {
+export async function GET(request: Request, props: { params: Promise<{ userId: string }> }) {
   const session = await auth();
 
   if (!session || !session.user?.id) {

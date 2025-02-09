@@ -3,7 +3,8 @@ import { signIn, auth, providerMap } from "@/app/auth";
 import { AuthError } from "next-auth";
 import { Grid, Button, Typography, Box, Alert } from "@mui/material";
 
-export default async function SignInPage({ searchParams }: any) {
+export default async function SignInPage(props: any) {
+    const searchParams = await props.searchParams;
     const error = searchParams?.error;
 
     return (

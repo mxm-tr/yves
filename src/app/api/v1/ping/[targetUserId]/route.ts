@@ -2,10 +2,8 @@ import { auth } from "@/app/auth"
 import { sendPing } from '@/app/lib/pings';
 import { NextResponse } from "next/server"
 
-export async function POST(
-  request: Request,
-  { params }: { params: { targetUserId: string } }
-) {
+export async function POST(request: Request, props: { params: Promise<{ targetUserId: string }> }) {
+  const params = await props.params;
   const session = await auth();
 
   if (!session || !session.user?.id) {

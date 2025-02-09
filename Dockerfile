@@ -1,5 +1,5 @@
 # Use the official Node.js image as the base image
-FROM node:21.6-alpine as app-base
+FROM node:23.7-alpine as app-base
 
 # Create a non-root user
 RUN adduser -D -h /home/app -s /bin/sh app
