@@ -71,14 +71,15 @@ export default function Sidebar() {
         <Box
             sx={{ width: 250 }}
             role="presentation"
-            onClick={toggleDrawer(false)}
-            onKeyDown={toggleDrawer(false)}
         >
             <ListItem disablePadding>
                 <UserCard session={session} />
             </ListItem>
             <Divider />
-            <List>
+            <List
+                onClick={toggleDrawer(false)}
+                onKeyDown={toggleDrawer(false)}
+            >
                 <ListItem disablePadding>
                     <ListItemButton component={Link} href="/">
                         <ListItemIcon><HomeIcon /></ListItemIcon>
@@ -104,14 +105,14 @@ export default function Sidebar() {
                     </ListItemButton>
                 </ListItem>
                 {(user ?
-                <ListItem disablePadding>
-                    {/* New Button to Open QR Code Modal */}
-                    <ListItemButton onClick={handleOpenQrModal}>
-                        <ListItemIcon><QrCodeIcon /></ListItemIcon>
-                        <ListItemText primary="My QR code" />
-                    </ListItemButton>
-                </ListItem>
-                :<div/>)}
+                    <ListItem disablePadding>
+                        {/* New Button to Open QR Code Modal */}
+                        <ListItemButton onClick={handleOpenQrModal}>
+                            <ListItemIcon><QrCodeIcon /></ListItemIcon>
+                            <ListItemText primary="My QR code" />
+                        </ListItemButton>
+                    </ListItem>
+                    : <div />)}
             </List>
         </Box>
     );
@@ -152,7 +153,7 @@ export default function Sidebar() {
                             <QRCode userID={user.id} />
                         </DialogContent>
                     </Dialog>
-                    : <div/>)}
+                    : <div />)}
             </Box>
         </Fragment>
     );

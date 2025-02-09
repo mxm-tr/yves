@@ -83,19 +83,22 @@ model User {
   ownedMeetings        Meeting[]
   meetingConfirmations MeetingConfirmation[]
 
+  sent_pings     Ping[] @relation("SentPings")
+  received_pings Ping[] @relation("ReceivedPings")
+
   @@map(name: "users")
 }
 
 model Meeting {
-  id      String   @id @default(cuid())
-  
-  date    DateTime
-  durationMinutes Int @default(60)
+  id String @id @default(cuid())
 
-  owner   User     @relation(fields: [ownerId], references: [id])
-  ownerId String   @map("user_id")
+  date            DateTime
+  durationMinutes Int      @default(60)
 
-  cost   Int    @default(0)
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String @map("user_id")
+
+  cost Int @default(0)
 
   numberOfGuests Int @default(1)
 
@@ -138,4 +141,21 @@ model FollowingLinks {
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
   @@map(name: "followingLinks")
+}
+
+model Ping {
+  id           String   @id @default(cuid())
+  acknowledged Boolean     @default(false)
+  sender       User     @relation("SentPings", fields: [senderId], references: [id])
+  senderId     String
+  receiver     User     @relation("ReceivedPings", fields: [receiverId], references: [id])
+  receiverId   String
+  date         DateTime @default(now()) @map(name: "ping_date")
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+  // Ensure a user can only ping another user once per day
+  @@unique([senderId, receiverId, date])
+  @@map(name: "pings")
 }

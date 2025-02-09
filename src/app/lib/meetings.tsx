@@ -359,11 +359,19 @@ export async function getCurrentUserMeetingsGroupedByDay(currentUserId: string):
 }
 
 export async function getSingleUserSchedules(currentUserId: string, userId: string): Promise<Meeting[]> {
+
+    const currentDate = new Date(); // Get the current date and time
+
     return prisma.meeting.findMany({
         relationLoadStrategy: 'join', // or 'query'
         where: {
             AND: [
                 { ownerId: userId }, // Display for the selected user
+                {
+                    date: {
+                        gt: currentDate // Only get meetings with a date greater than the current date and time
+                    }
+                },
                 {
                     OR: [
                         {

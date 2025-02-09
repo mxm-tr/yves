@@ -73,8 +73,18 @@ export default function MeetingForm() {
     const handleSuccessModalClose = () => {
         // Close the success modal
         setSuccessModalOpen(false);
-        // Redirect to the home page
+        // Redirect to the planning page
         router.push('/planning');
+    };
+
+    // State for the success modal
+    const [pingSuccessModalOpen, setPingSuccessModalOpen] = useState(false);
+
+    const handlePingSuccessModalClose = () => {
+        // Close the success modal
+        setPingSuccessModalOpen(false);
+        // Deselect the user
+        setMeetingOwner(undefined)
     };
 
 
@@ -102,6 +112,40 @@ export default function MeetingForm() {
         } catch (error) {
             console.error('Error scheduling meeting', error);
             setError('Error scheduling meeting. Please try again later.');
+        } finally {
+            // Hide loading state
+            setIsLoading(false);
+        }
+    }
+
+    const handleSendPing = async () => {
+        try {
+            // Show loading state
+            setIsLoading(true);
+
+            // Send a POST request to the backend API
+            const response = await fetch(`/api/v1/ping/${scheduleOwner?.id}`, { method: 'POST' });
+
+            if (response.ok) {
+
+                // If the response status is 200 OK, set isDeleted to true to hide the card
+                setIsLoading(true);
+
+                // Show success alert
+                setPingSuccessModalOpen(true);
+
+            } else {
+                // Handle non-successful response (e.g., display an error message)
+                console.error('Cannot send ping:', response.status);
+                setError('Cannot send ping: ' + (await response.json()).message);
+                // Deselect the user
+                setMeetingOwner(undefined)
+            }
+        } catch (error) {
+            console.error('Cannot send ping', error);
+            setError('Cannot send ping.');
+            // Deselect the user
+            setMeetingOwner(undefined)
         } finally {
             // Hide loading state
             setIsLoading(false);
@@ -240,25 +284,54 @@ export default function MeetingForm() {
                                                     ))}
                                                 </List>
                                             </Grid>
+                                            {/* Button to book a Meeting */}
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={handleMeetingMeeting}
+                                                disabled={!selectedDay || !selectedTime}
+                                                aria-disabled={isLoading}
+                                            >
+                                                Schedule Meeting
+                                            </Button>
                                         </Grid>
                                     ))}
                                 </Grid>
-                                : <Typography variant="h6">No more schedule available for {scheduleOwner.name}</Typography>}
+                                : (
+                                    <Grid item xs={12}
+                                        textAlign="center"
+                                        justifyContent="center"
+                                        alignItems="center">
+                                        <Typography variant="h6">No more schedule available for {scheduleOwner.name}, let them know they are missing out!</Typography>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={handleSendPing}
+                                            aria-disabled={isLoading}
+                                        >
+                                            Send a ping
+                                        </Button>
+                                    </Grid>
+                                )
+                            }
                         </Grid>
                         : ""}
-
-                    {/* Button to Meeting Meeting */}
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleMeetingMeeting}
-                        disabled={!selectedDay || !selectedTime}
-                        aria-disabled={isLoading}
-                    >
-                        Schedule Meeting
-                    </Button>
                 </Grid>
-
+                <Dialog open={pingSuccessModalOpen} onClose={handlePingSuccessModalClose}>
+                    <DialogTitle>Ping sent</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Your have let {scheduleOwner?.name} know that you were looking out to meet them.
+                            <br />
+                            You will be notified if they post new schedules!
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handlePingSuccessModalClose} color="primary">
+                            OK
+                        </Button>
+                    </DialogActions>
+                </Dialog>
                 <Dialog open={successModalOpen} onClose={handleSuccessModalClose}>
                     <DialogTitle>Meeting scheduled successfully!</DialogTitle>
                     <DialogContent>

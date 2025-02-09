@@ -1,4 +1,4 @@
-import { Meeting, User, MeetingConfirmation } from '@prisma/client';
+import { Meeting, User, MeetingConfirmation, Ping } from '@prisma/client';
 
 export interface MeetingWithOwner extends Meeting {
     owner: User
@@ -17,6 +17,10 @@ export interface MeetingConfirmationWithGuests extends MeetingConfirmation {
     user: User
 }
 
+export interface PingWithSender extends Ping {
+    sender: User
+}
+
 // Custom error classes
 export class InsufficientCoinsError extends Error {
     constructor() {
@@ -31,3 +35,4 @@ export class WalletAmountNotFoundError extends Error {
         this.name = 'WalletAmountNotFoundError';
     }
 }
+
