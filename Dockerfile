@@ -1,5 +1,5 @@
-# Use the official Node.js image as the base image
-FROM node:21.6-alpine as app-base
+# Use the official Node.js image AS the base image
+FROM node:23.7-alpine AS app-base
 
 # Create a non-root user
 RUN adduser -D -h /home/app -s /bin/sh app
@@ -26,7 +26,7 @@ RUN npm install
 # Copy the rest of the application code to the working directory
 COPY --chown=app:app . .
 
-FROM app-base as prod-build
+FROM app-base AS prod-build
 
 # Build the Next.js app
 RUN ./node_modules/.bin/prisma generate && npm run build
